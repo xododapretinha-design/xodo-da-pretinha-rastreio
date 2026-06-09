@@ -526,6 +526,9 @@ app.delete('/api/orders/:code', requireAdmin, async (req, res) => {
     } else {
         res.status(404).json({ success: false, message: "Encomenda não encontrada ou erro ao excluir." });
     }
+// 8. Rota coringa para servir o Frontend SPA (index.html)
+app.get('*', (req, res) => {
+    res.sendFile(path.join(__dirname, '..', 'index.html'));
 });
 
 // Apenas escutar porta se rodando localmente (não no Vercel serverless worker)
