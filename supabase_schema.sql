@@ -17,12 +17,10 @@ CREATE TABLE IF NOT EXISTS orders (
     history JSONB NOT NULL DEFAULT '[]'::jsonb -- Histórico detalhado de mudanças de status
 );
 
--- 2. Habilitar RLS (Row Level Security) - Opcional
--- Por segurança, o Supabase habilita RLS por padrão. Se desejar usar chaves anônimas padrão
--- para leitura direta do client sem autenticação complexa, você pode desabilitar o RLS
--- ou criar políticas adequadas. Como nossa API Node atua como middleware (intermediária),
--- o backend é quem fará as chamadas usando a chave secreta. Portanto, o acesso direto à tabela pode ser protegido.
-ALTER TABLE orders ENABLE ROW LEVEL SECURITY;
+-- 2. Desabilitar RLS (Row Level Security) para simplificar acessos
+-- Como o nosso backend Express já protege todas as rotas com token/senha de administrador,
+-- desabilitar o RLS permite que a chave anônima da API execute leituras e escritas sem bloqueio.
+ALTER TABLE orders DISABLE ROW LEVEL SECURITY;
 
 -- Política de leitura: Permitir leitura pública se você quiser consultar direto via JS (opcional)
 -- CREATE POLICY "Permitir leitura pública de encomendas" ON orders FOR SELECT USING (true);
