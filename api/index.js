@@ -242,12 +242,19 @@ async function triggerResendEmail(order) {
         console.warn(`[Aviso] Falha ao carregar template ${templateName}: ${e.message}. Usando fallback embutido.`);
         emailHtml = `
         <html>
-        <body style="font-family: Arial, sans-serif; background: #0b0612; color: #f3effa; padding: 20px;">
-            <h2>Atualização da Encomenda - Xodó da Pretinha</h2>
-            <p>Olá, <strong>${order.customerName}</strong>!</p>
-            <p>Sua encomenda <strong>${order.trackingCode}</strong> avançou para a fase: <strong>${stageEmoji} ${stageName}</strong></p>
-            <p><strong>${eventTitle}:</strong> ${eventDescription}</p>
-            <p><a href="${trackingLink}">Acompanhar em tempo real</a></p>
+        <body style="font-family: 'Segoe UI', Arial, sans-serif; background-color: #f6f3f9; color: #2e2438; margin: 0; padding: 30px 15px;">
+            <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; border: 1px solid rgba(255, 71, 126, 0.15); border-radius: 16px; padding: 30px; box-shadow: 0 8px 30px rgba(138, 63, 252, 0.06);">
+                <h2 style="font-family: 'Georgia', serif; color: #ff477e; margin-top: 0; border-bottom: 1px solid rgba(255, 71, 126, 0.1); padding-bottom: 10px;">Xodó da Pretinha</h2>
+                <p style="font-size: 16px; line-height: 1.6;">Olá, <strong>${order.customerName}</strong>!</p>
+                <p style="font-size: 15px; line-height: 1.6;">Sua encomenda <strong>${order.trackingCode}</strong> avançou para a fase: <strong style="color: #8a3ffc;">${stageEmoji} ${stageName}</strong></p>
+                <div style="background: #faf7fd; border-left: 4px solid #ff477e; padding: 15px; margin: 20px 0; border-radius: 4px;">
+                    <strong style="color: #2e2438; display: block; margin-bottom: 5px;">${eventTitle}</strong>
+                    <span style="color: #524366; font-size: 14px; line-height: 1.5;">${eventDescription}</span>
+                </div>
+                <p style="margin-top: 25px;"><a href="${trackingLink}" style="display: inline-block; background: linear-gradient(135deg, #ff477e 0%, #8a3ffc 100%); color: #ffffff !important; text-decoration: none; padding: 12px 25px; border-radius: 6px; font-weight: bold; font-size: 15px;">Acompanhar Encomenda Online</a></p>
+                <hr style="border: 0; border-top: 1px solid rgba(0,0,0,0.05); margin: 30px 0 15px;">
+                <p style="font-size: 11px; color: #7a6b8f; text-align: center; margin: 0;">&copy; 2026 Xodó da Pretinha. Todos os direitos reservados.</p>
+            </div>
         </body>
         </html>
         `;
