@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Xodó da Pretinha - Rastreio de Encomendas</title>
+    <link rel="stylesheet" href="styles.css">
+    <!-- Meta tags SEO básicas -->
+    <meta name="description" content="Acompanhe o status e a localização da sua encomenda na loja Xodó da Pretinha de forma rápida e segura. Desde a aquisição até a recepção em Angola.">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Cabeçalho Principal (Ocultado ou ajustado após login) -->
+        <header id="main-header" style="display: none;">
+            <div class="logo-container">
+                <span class="logo-main" id="app-logo">Xodó da Pretinha</span>
+                <span class="logo-sub" id="header-subtitle">Rastreio de Encomendas</span>
+            </div>
+            <div class="nav-controls">
+                <span id="user-display-name" style="font-size: 0.9rem; color: var(--accent-gold); font-weight: 600; align-self: center;"></span>
+                <button class="btn-glass" id="logout-btn">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" x2="9" y1="12" y2="12"/></svg>
+                    Sair
+                </button>
+            </div>
+        </header>
+
+        <!-- GATEWAY DE ENTRADA (TELA DE LOGIN UNIFICADA) -->
+        <main class="page-view active" id="view-gateway">
+            <div class="gateway-container">
+                <div class="gateway-logo-area">
+                    <h1 class="logo-main" style="font-size: 3rem;">Xodó da Pretinha</h1>
+                    <p class="logo-sub" style="font-size: 1.1rem; letter-spacing: 4px;">Portal de Logística e Rastreio</p>
+                </div>
+
+                <div class="glass-card gateway-card">
+                    <!-- Abas de Navegação do Login -->
+                    <div class="gateway-tabs">
+                        <button class="gateway-tab active" id="tab-client-btn">Acesso Cliente</button>
+                        <button class="gateway-tab" id="tab-admin-btn">Acesso Administrativo</button>
+                    </div>
+
+                    <!-- Formulário do Cliente -->
+                    <div class="gateway-form-pane active" id="pane-client">
+                        <h2 class="form-pane-title">Rastrear Encomenda</h2>
+                        <p class="form-pane-subtitle">Insira o código de rastreamento recebido por e-mail ou WhatsApp.</p>
+                        
+                        <form id="gateway-client-form">
+                            <div class="form-group">
+                                <label for="gateway-tracking-code">Código de Rastreio</label>
+                                <input type="text" id="gateway-tracking-code" placeholder="Ex: XODO-PT-101" required autocomplete="off">
+                            </div>
+                            <button type="submit" class="btn-primary" style="width: 100%; justify-content: center; margin-top: 1rem;">
+                                Acessar Rastreamento
+                            </button>
+                        </form>
+                        
+                        <div class="test-codes" style="margin-top: 2rem;">
+                            <span>Códigos de teste:</span>
+                            <span class="test-code-link" onclick="prefillGatewayCode('XODO-PT-101')">XODO-PT-101</span>
+                            <span class="test-code-link" onclick="prefillGatewayCode('XODO-PT-102')">XODO-PT-102</span>
+                        </div>
+                    </div>
+
+                    <!-- Formulário do Administrador -->
+                    <div class="gateway-form-pane" id="pane-admin">
+                        <h2 class="form-pane-title">Área Administrativa</h2>
+                        <p class="form-pane-subtitle">Entre com suas credenciais de gestor da loja.</p>
+                        
+                        <form id="gateway-admin-form">
+                            <div class="form-group">
+                                <label for="gateway-admin-user">Usuário</label>
+                                <input type="text" id="gateway-admin-user" placeholder="Usuário admin" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="gateway-admin-pass">Senha</label>
+                                <input type="password" id="gateway-admin-pass" placeholder="••••••••" required>
+                            </div>
+                            <button type="submit" class="btn-primary" style="width: 100%; justify-content: center; margin-top: 1rem;">
+                                Entrar no Painel
+                            </button>
+                        </form>
+                        <div class="test-codes" style="margin-top: 1.5rem; font-size: 0.8rem;">
+                            <span>Credenciais: usuário: <strong>admin</strong> | senha: <strong>adminxodo</strong></span>
+                        </div>
+                    </div>
+
+                    <!-- Mensagem de Erro -->
+                    <div class="error-banner" id="gateway-error-banner" style="margin-top: 1.5rem;">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" x2="12" y1="8" y2="12"/><line x1="12" x2="12.01" y1="16" y2="16"/></svg>
+                        <span id="gateway-error-text">Código inválido ou credenciais incorretas.</span>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- PORTAL DO CLIENTE -->
+        <main class="page-view" id="view-client">
+            <section id="tracking-result-section">
+                <!-- Bento Grid Result -->
+                <div class="tracking-result-grid" id="print-area">
+                    
+                    <!-- Card Principal: Timeline de Rastreio -->
+                    <div class="glass-card bento-main-card" id="card-timeline">
+                        <div class="overview-header">
+                            <div>
+                                <span class="overview-code" id="res-code">XODO-PT-101</span>
+                                <div class="overview-meta" style="margin-top: 0.4rem;">
+                                    <span>Cliente: <strong id="res-client">Maria Silva</strong></span>
+                                    <span>Destino: <strong id="res-destination">Luanda, AO</strong></span>
+                                </div>
+                            </div>
+                            <div class="overview-meta" style="align-items: flex-end; flex-direction: column; gap: 0.5rem;">
+                                <div class="res-dates-holder">
+                                    <span>Criado: <strong id="res-created">01/06/2026</strong></span>
+                                    <span style="margin-left: 1rem;">Atualizado: <strong id="res-updated">08/06/2026</strong></span>
+                                </div>
+                                <button class="btn-glass no-print" id="btn-print-slip" style="padding: 0.4rem 1rem; font-size: 0.85rem; border-radius: 8px; margin-top: 0.4rem;">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><polygon points="6 14 18 14 18 22 6 22 6 14"/><rect width="12" height="8" x="6" y="2"/></svg>
+                                    Imprimir Guia
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Timeline Visual -->
+                        <div class="timeline-container">
+                            <div class="timeline-track">
+                                <div class="timeline-progress-bar" id="timeline-progress"></div>
+                                
+                                <div class="timeline-step" id="step-1">
+                                    <div class="step-icon-wrapper" title="Aquisição">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+                                    </div>
+                                    <span class="step-label">Aquisição</span>
+                                </div>
+                                
+                                <div class="timeline-step" id="step-2">
+                                    <div class="step-icon-wrapper" title="Empacotamento">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
+                                    </div>
+                                    <span class="step-label">Empacotamento</span>
+                                </div>
+                                
+                                <div class="timeline-step" id="step-3">
+                                    <div class="step-icon-wrapper" title="Envio p/ Angola">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><path d="M12 22v-9"/><path d="M12 8.5 16 11"/><path d="M12 8.5 8 11"/><path d="M12 3.5 19 7.5 12 11.5 5 7.5z"/></svg>
+                                    </div>
+                                    <span class="step-label">Envio Angola</span>
+                                </div>
+                                
+                                <div class="timeline-step" id="step-4">
+                                    <div class="step-icon-wrapper" title="Recepção">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3.85 8.62a4 4 0 0 1 4.78-4.77 4 4 0 0 1 6.74 0 4 4 0 0 1 4.78 4.78 4 4 0 0 1 0 6.74 4 4 0 0 1-4.77 4.78 4 4 0 0 1-6.75 0 4 4 0 0 1-4.78-4.77 4 4 0 0 1 0-6.76Z"/><path d="m9 12 2 2 4-4"/></svg>
+                                    </div>
+                                    <span class="step-label">Recepção</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Resumo do Status Atual -->
+                        <div class="status-details-box" id="res-status-banner">
+                            <h2 class="status-title-large" id="res-status-title">A caminho de Angola</h2>
+                            <p class="res-status-text" id="res-status-desc">A encomenda saiu do armazém central e está em trânsito aéreo.</p>
+                        </div>
+                    </div>
+
+                    <!-- Bento Card Esquerdo: Detalhes dos Itens -->
+                    <div class="glass-card">
+                        <h3 class="details-section-title">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+                            Produtos
+                        </h3>
+                        <div id="res-products-list">
+                            <!-- Items inserted dynamically -->
+                        </div>
+
+                        <div class="meta-info-list">
+                            <div class="meta-info-row">
+                                <span class="meta-info-label">Destinatário:</span>
+                                <span class="meta-info-value" id="res-client-meta">Maria Silva</span>
+                            </div>
+                            <div class="meta-info-row">
+                                <span class="meta-info-label">E-mail de Notificação:</span>
+                                <span class="meta-info-value" id="res-email-meta">maria@exemplo.com</span>
+                            </div>
+                            <div class="meta-info-row">
+                                <span class="meta-info-label">Cidade Destino:</span>
+                                <span class="meta-info-value" id="res-destination-meta">Luanda</span>
+                            </div>
+                            <div class="meta-info-row">
+                                <span class="meta-info-label">Transportadora:</span>
+                                <span class="meta-info-value" id="res-carrier">Xodó Logística Expresso</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Bento Card Direito: Histórico Detalhado -->
+                    <div class="glass-card">
+                        <h3 class="details-section-title">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                            Histórico de Atualizações
+                        </h3>
+                        <div class="history-timeline" id="res-history-log">
+                            <!-- History logs loaded dynamically -->
+                        </div>
+                    </div>
+
+                </div>
+            </section>
+        </main>
+
+        <!-- PAINEL ADMINISTRATIVO -->
+        <main class="page-view" id="view-admin">
+            <!-- Estatísticas Rápidas (Bento Row) -->
+            <div class="admin-stats-container" id="admin-stats-row">
+                <div class="stat-card">
+                    <span class="stat-number" id="stat-total">0</span>
+                    <span class="stat-label">📋 Total Encomendas</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-number" id="stat-acq">0</span>
+                    <span class="stat-label">🔍 Em Aquisição</span>
+                </div>
+                <div class="stat-card stat-transit">
+                    <span class="stat-number" id="stat-transit">0</span>
+                    <span class="stat-label">✈️ Em Trânsito</span>
+                </div>
+                <div class="stat-card stat-done">
+                    <span class="stat-number" id="stat-done">0</span>
+                    <span class="stat-label">🤝 Entregues / Retirada</span>
+                </div>
+            </div>
+
+            <div class="admin-grid">
+                
+                <!-- Coluna Esquerda: Nova Encomenda -->
+                <div class="glass-card">
+                    <h2 class="form-title">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
+                        Nova Encomenda
+                    </h2>
+                    <form id="admin-create-form">
+                        
+                        <div class="form-group">
+                            <label for="admin-code">Código de Rastreio</label>
+                            <div class="input-code-wrapper">
+                                <input type="text" id="admin-code" placeholder="Ex: XODO-AO-2384" required>
+                                <button type="button" class="btn-accent" id="admin-generate-code-btn" style="padding: 0.5rem 1rem;">Gerar</button>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="admin-client">Nome do Cliente</label>
+                            <input type="text" id="admin-client" placeholder="Nome completo" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="admin-email">E-mail do Cliente (Notificações)</label>
+                            <input type="email" id="admin-email" placeholder="cliente@exemplo.com" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="admin-destination">Destino (Cidade/Província)</label>
+                            <input type="text" id="admin-destination" placeholder="Ex: Luanda" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="admin-products">Produtos (Separados por vírgula)</label>
+                            <textarea id="admin-products" rows="3" placeholder="Ex: Vestido Pretinha Glow (1), Brinco Argola Ouro (2)" required></textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="admin-initial-note">Nota de Status Inicial</label>
+                            <input type="text" id="admin-initial-note" placeholder="Ex: Pedido recebido e aguardando separação." required>
+                        </div>
+
+                        <button type="submit" class="btn-primary" style="width: 100%; justify-content: center; margin-top: 1rem;">
+                            Cadastrar Encomenda
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Coluna Direita: Gestão de Encomendas -->
+                <div class="glass-card">
+                    <div class="order-manager-header">
+                        <h2 class="form-title" style="margin-bottom: 0;">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                            Encomendas Cadastradas
+                        </h2>
+                        
+                        <div style="max-width: 250px; width: 100%;">
+                            <input type="text" id="admin-search" placeholder="Filtrar encomendas..." class="form-group" style="padding: 0.5rem 0.8rem; margin: 0; font-size: 0.85rem; border-radius: 8px;">
+                        </div>
+                    </div>
+
+                    <div class="admin-orders-list" id="admin-orders-list">
+                        <!-- Dynamic list of orders in management dashboard -->
+                    </div>
+                </div>
+
+            </div>
+        </main>
+
+        <!-- FOOTER -->
+        <footer class="no-print">
+            <p>&copy; 2026 <strong>Xodó da Pretinha</strong>. Todos os direitos reservados. Feito com amor.</p>
+        </footer>
+    </div>
+
+    <!-- MODAL EDITAR INFORMAÇÕES CLIENTE -->
+    <div class="modal-backdrop" id="edit-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Editar Detalhes da Encomenda</h3>
+                <button class="modal-close" id="edit-modal-close-btn">&times;</button>
+            </div>
+            <form id="modal-edit-form">
+                <input type="hidden" id="edit-order-code">
+                
+                <div class="form-group">
+                    <label for="edit-client">Nome do Cliente</label>
+                    <input type="text" id="edit-client" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="edit-email">E-mail do Cliente</label>
+                    <input type="email" id="edit-email" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="edit-destination">Destino (Cidade/Província)</label>
+                    <input type="text" id="edit-destination" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="edit-products">Produtos (Separados por vírgula)</label>
+                    <textarea id="edit-products" rows="3" required></textarea>
+                </div>
+
+                <div class="modal-actions">
+                    <button type="button" class="btn-glass" id="edit-modal-cancel-btn">Cancelar</button>
+                    <button type="submit" class="btn-primary">Salvar Alterações</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL ADICIONAR LOG / HISTÓRICO -->
+    <div class="modal-backdrop" id="log-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Atualizar Status & Histórico</h3>
+                <button class="modal-close" id="modal-close-btn">&times;</button>
+            </div>
+            <form id="modal-log-form">
+                <input type="hidden" id="modal-order-code">
+                
+                <div class="form-group">
+                    <label for="modal-stage">Nova Fase da Encomenda</label>
+                    <select id="modal-stage" required>
+                        <option value="1">1 - Aquisição do Produto</option>
+                        <option value="2">2 - Empacotamento</option>
+                        <option value="3">3 - Envio para Angola</option>
+                        <option value="4">4 - Recepção</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="modal-log-title">Título do Evento</label>
+                    <input type="text" id="modal-log-title" placeholder="Ex: Encomenda saiu para aeroporto" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="modal-log-desc">Nota/Descrição Detalhada</label>
+                    <textarea id="modal-log-desc" rows="3" placeholder="Informações detalhadas sobre o trânsito da encomenda..." required></textarea>
+                </div>
+
+                <div class="modal-actions">
+                    <button type="button" class="btn-glass" id="modal-cancel-btn">Cancelar</button>
+                    <button type="submit" class="btn-primary">Salvar e Enviar E-mail</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- TOAST NOTIFICATION CONTAINER -->
+    <div class="toast-container" id="toast-container"></div>
+
+    <script src="app.js"></script>
+</body>
+</html>

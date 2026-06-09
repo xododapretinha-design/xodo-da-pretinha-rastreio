@@ -1,0 +1,75 @@
+[
+  {
+    "trackingCode": "XODO-PT-101",
+    "customerName": "Maria Silva",
+    "customerEmail": "jutxica2202@gmail.com",
+    "destination": "Luanda, Angola",
+    "products": [
+      "Vestido Pretinha Glow (1)",
+      "Brincos Afroroot (2)",
+      "Acessório Turbante Seda (1)"
+    ],
+    "currentStage": 2,
+    "createdAt": "2026-06-01T10:30:00",
+    "updatedAt": "2026-06-09T14:38:42.890Z",
+    "history": [
+      {
+        "stage": 2,
+        "title": "Status alterado para Empacotamento",
+        "description": "Sua encomenda está sendo cuidadosamente embalada, perfumada e preparada para transporte de longa distância, garantindo total segurança física dos itens.",
+        "timestamp": "2026-06-09T14:38:42.890Z"
+      },
+      {
+        "stage": 4,
+        "title": "Dados Cadastrais Modificados",
+        "description": "Informações cadastrais da encomenda foram atualizadas no sistema.",
+        "timestamp": "2026-06-09T14:38:38.240Z"
+      },
+      {
+        "stage": 4,
+        "title": "Status alterado para Disponível em Angola",
+        "description": "Sua encomenda chegou em solo angolano! O produto já está disponível para retirada no nosso ponto de distribuição ou em trânsito para entrega ao cliente.",
+        "timestamp": "2026-06-09T14:25:22.102Z"
+      },
+      {
+        "stage": 3,
+        "title": "Despachado para Luanda",
+        "description": "A carga foi colocada em trânsito aéreo pelo voo DT-652 da TAAG com destino ao Aeroporto 4 de Fevereiro em Luanda. Previsão de chegada em 48h.",
+        "timestamp": "2026-06-08T09:00:00"
+      },
+      {
+        "stage": 2,
+        "title": "Empacotamento Concluído",
+        "description": "Sua encomenda foi embalada com amor, envolvida em plástico bolha protetor e selada com a nossa fragrância premium Pretinha.",
+        "timestamp": "2026-06-03T14:15:00"
+      },
+      {
+        "stage": 1,
+        "title": "Aquisição e Verificação",
+        "description": "Produtos adquiridos dos fornecedores selecionados. Passou pelo controle de qualidade e foi encaminhado para o setor de embalagens.",
+        "timestamp": "2026-06-01T10:30:00"
+      }
+    ]
+  },
+  {
+    "trackingCode": "XODO-PT-102",
+    "customerName": "Anacleto Neto",
+    "customerEmail": "anacleto@exemplo.com",
+    "destination": "Benguela, Angola",
+    "products": [
+      "Camisa Afro-Fashion Masculina (1)",
+      "Sandálias de Couro Pretinha (1)"
+    ],
+    "currentStage": 1,
+    "createdAt": "2026-06-09T08:30:00",
+    "updatedAt": "2026-06-09T08:30:00",
+    "history": [
+      {
+        "stage": 1,
+        "title": "Aquisição Iniciada",
+        "description": "Os itens foram selecionados e estamos aguardando a chegada no armazém central para conferência de tamanho e cor.",
+        "timestamp": "2026-06-09T08:30:00"
+      }
+    ]
+  }
+]

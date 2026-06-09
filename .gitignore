@@ -1,0 +1,24 @@
+# Dependências do Node
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# Configurações Locais e Chaves Privadas (NUNCA enviar ao GitHub!)
+.env
+.env.local
+.env.production
+.env.development
+.env.*.local
+
+# Arquivos do Sistema Operacional e Editores
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
