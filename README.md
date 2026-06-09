@@ -21,8 +21,8 @@ Um sistema premium e moderno de rastreamento de encomendas de ponta a ponta (Ful
 - **Gerenciamento de Encomendas:** Criar novas encomendas com múltiplos itens, editar dados de clientes (nome, e-mail, destino), e registrar notas detalhadas no histórico de trânsito.
 - **Transição de Estágios Simplificada:** Atualize o estágio com um único clique. O sistema se encarrega de registrar no histórico e enviar o e-mail correspondente.
 
-### 📧 Automação de E-mails com Resend
-- Integração nativa com a API do **Resend** para disparos rápidos.
+### 📧 Automação de E-mails (Resend ou Gmail SMTP)
+- **Suporte Duplo:** Integração nativa com a API do **Resend** (ideal com domínio próprio) ou via **Gmail SMTP** (100% gratuito e sem necessidade de domínio).
 - **Templates Customizados:** 4 modelos de e-mail HTML modernos e responsivos (um para cada fase), contendo placeholders para personalização de nome, código de rastreio, produtos e mensagens de histórico.
 - **Fallback Automático:** Caso ocorra algum erro na leitura dos templates físicos, o sistema dispara um e-mail HTML padrão robusto sem interromper o fluxo da aplicação.
 
@@ -42,6 +42,8 @@ Um sistema premium e moderno de rastreamento de encomendas de ponta a ponta (Ful
 
 ```text
 Ratreio/
+├── api/
+│   └── index.js             # API Express e Integração Supabase/Resend (Serverless Function)
 ├── data/
 │   └── orders.json          # Banco de dados JSON local (fallback / dev local)
 ├── templates/
@@ -52,7 +54,6 @@ Ratreio/
 ├── app.js                   # Lógica e rotas da SPA no Frontend
 ├── index.html               # Estrutura HTML da SPA
 ├── styles.css               # Design Visual e responsividade (Glassmorphism e Print)
-├── server.js                # API Express e Integração Supabase/Resend
 ├── supabase_schema.sql      # Script de criação de tabelas e seeds para o Supabase
 ├── vercel.json              # Configuração de rotas serverless para Vercel
 ├── package.json             # Dependências do projeto
@@ -85,7 +86,8 @@ Copie o arquivo de exemplo e preencha com suas credenciais:
 cp .env.example .env
 ```
 Abra o arquivo `.env` e configure:
-- `RESEND_API_KEY`: Sua chave de API obtida na aba API Keys do Resend.
+- `RESEND_API_KEY`: Sua chave de API do Resend (se usar o Resend).
+- `GMAIL_USER` e `GMAIL_APP_PASS`: Seu e-mail e Senha de App do Gmail (se preferir a alternativa gratuita sem domínio).
 - `ADMIN_PASSWORD`: A senha que você usará para acessar o painel admin.
 - `JWT_SECRET`: Uma frase secreta para garantir a segurança da sessão do admin.
 - `SUPABASE_URL` e `SUPABASE_ANON_KEY` (Opcional localmente, obrigatório na nuvem): URL e chave anônima do seu projeto Supabase. Se deixados como padrão, o sistema usará o banco de dados JSON local `data/orders.json`.
@@ -94,7 +96,7 @@ Abra o arquivo `.env` e configure:
 ```bash
 npm run dev
 # ou
-node server.js
+node api/index.js
 ```
 Acesse no seu navegador: `http://localhost:8080`
 
@@ -109,25 +111,45 @@ Acesse no seu navegador: `http://localhost:8080`
 4. Copie o conteúdo do arquivo [supabase_schema.sql](file:///Users/fr.utxicascj/Desktop/Ratreio/supabase_schema.sql) deste repositório, cole no editor e clique em **Run**. Isso criará a tabela e inserirá dados de teste.
 5. Vá em **Project Settings -> API** e copie o **Project URL** e a chave **anon public**.
 
-### Passo 2: Configurar o Domínio no Resend
+### Passo 2: Configurar Envio de E-mails (Escolha uma opção)
+
+#### Opção A (Recomendada - Gratuita e Sem Domínio): Usar Gmail SMTP
+Se você não tem um domínio próprio (ex: `.com` ou `.shop`), você pode enviar e-mails de notificação usando sua conta pessoal do Gmail de forma totalmente gratuita e sem restrição de destinatários:
+1. Acesse as configurações da sua **Conta Google** (no perfil do seu Gmail).
+2. Vá em **Segurança** e ative a **Verificação em duas etapas** (se já não estiver ativa).
+3. Na barra de busca da Conta Google, pesquise por **Senhas de app** (App Passwords).
+4. Crie uma nova senha de aplicativo (escolha um nome como "Rastreio Boutique").
+5. O Google gerará uma senha de **16 caracteres**. Copie-a (sem os espaços).
+6. Adicione no seu `.env` local e nas chaves da Vercel:
+   - `GMAIL_USER` = `seu-email@gmail.com`
+   - `GMAIL_APP_PASS` = `sua-senha-de-app-de-16-caracteres`
+
+#### Opção B: Configurar o Domínio no Resend
+Se você já possui um domínio registrado e quer e-mails mais profissionais (ex: `contato@xododapretinha.shop`):
 1. Cadastre-se no [Resend](https://resend.com/).
 2. Vá em **Domains** e adicione o domínio do seu site (ex: `xododapretinha.shop`).
 3. Adicione os registros DNS apontados pelo Resend no seu provedor de domínio (como GoDaddy, Hostgator, Cloudflare).
-4. Após a verificação do domínio, você poderá enviar e-mails de `qualquer-coisa@seu-dominio.com` para qualquer cliente externo. 
-   *(Nota: Contas gratuitas do Resend sem domínio verificado só podem enviar e-mails para o e-mail de cadastro da própria conta).*
+4. Após a verificação do domínio, preencha no `.env` e Vercel:
+   - `RESEND_API_KEY` = `re_sua_chave`
+   - `EMAIL_FROM` = `Xodó da Pretinha <contato@seu-dominio-verificado.com>`
 
 ### Passo 3: Publicação na Vercel
 1. Crie ou conecte sua conta na [Vercel](https://vercel.com/).
 2. Adicione um novo projeto e conecte com o repositório do GitHub criado.
-3. Durante a etapa de configuração, clique em **Environment Variables** e adicione todas as chaves contidas no seu arquivo `.env`:
-   - `PORT` = 8080
-   - `RESEND_API_KEY` = (sua chave real)
-   - `ADMIN_USER` = (seu usuário admin)
-   - `ADMIN_PASSWORD` = (sua senha segura)
-   - `JWT_SECRET` = (seu segredo longo)
-   - `EMAIL_FROM` = `Xodó da Pretinha <contato@seu-dominio-verificado.com>`
-   - `SUPABASE_URL` = (sua url do supabase)
-   - `SUPABASE_ANON_KEY` = (sua chave anon do supabase)
+3. Durante a etapa de configuração, clique em **Environment Variables** e adicione as variáveis dependendo do método de envio escolhido:
+   * **Gerais e Banco:**
+     - `PORT` = `8080`
+     - `ADMIN_USER` = `admin`
+     - `ADMIN_PASSWORD` = (sua senha segura)
+     - `JWT_SECRET` = (seu segredo longo)
+     - `SUPABASE_URL` = (sua url do supabase)
+     - `SUPABASE_ANON_KEY` = (sua chave anon do supabase)
+   * **Se optar pelo Gmail SMTP (Opção A):**
+     - `GMAIL_USER` = `seu-email@gmail.com`
+     - `GMAIL_APP_PASS` = (sua senha de app de 16 caracteres)
+   * **Se optar pelo Resend (Opção B):**
+     - `RESEND_API_KEY` = (sua chave real do resend)
+     - `EMAIL_FROM` = `Xodó da Pretinha <contato@seu-dominio-verificado.com>`
 4. Clique em **Deploy**. A Vercel cuidará do build e fornecerá um link HTTPS seguro para acessar o sistema de qualquer lugar.
 
 ---

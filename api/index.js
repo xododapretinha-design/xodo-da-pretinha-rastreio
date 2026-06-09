@@ -9,6 +9,7 @@ const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
 const { createClient } = require('@supabase/supabase-js');
+const nodemailer = require('nodemailer');
 
 // Carregar variáveis de ambiente
 dotenv.config();
@@ -254,8 +255,36 @@ async function triggerResendEmail(order) {
 
     const resendApiKey = process.env.RESEND_API_KEY;
     const emailFrom = process.env.EMAIL_FROM || 'Xodó da Pretinha <onboarding@resend.dev>';
+    const gmailUser = process.env.GMAIL_USER;
+    const gmailAppPass = process.env.GMAIL_APP_PASS;
 
-    if (resendApiKey && resendApiKey.startsWith('re_')) {
+    // Método 1: Envio por Gmail SMTP (Ideal para desenvolvimento sem domínio próprio)
+    if (gmailUser && gmailAppPass) {
+        try {
+            const transporter = nodemailer.createTransport({
+                service: 'gmail',
+                auth: {
+                    user: gmailUser,
+                    pass: gmailAppPass
+                }
+            });
+
+            await transporter.sendMail({
+                from: `"Xodó da Pretinha" <${gmailUser}>`,
+                to: order.customerEmail,
+                subject: `Xodó da Pretinha - Atualização [Código: ${order.trackingCode}]`,
+                html: emailHtml,
+            });
+
+            console.log(`🟢 E-mail enviado com sucesso via Gmail SMTP para ${order.customerEmail}`);
+            return { success: true, method: 'gmail' };
+        } catch (err) {
+            console.error("[Gmail SMTP Error]:", err);
+            return { success: false, error: err.message };
+        }
+    } 
+    // Método 2: Envio por Resend SDK (Ideal para produção com domínio próprio verificado)
+    else if (resendApiKey && resendApiKey.startsWith('re_') && !resendApiKey.includes('your-api-key')) {
         try {
             const resend = new Resend(resendApiKey);
             const { data, error } = await resend.emails.send({
@@ -274,7 +303,9 @@ async function triggerResendEmail(order) {
             console.error("[Resend SDK Exception]:", err);
             return { success: false, error: err.message };
         }
-    } else {
+    } 
+    // Fallback: Simulador local no console
+    else {
         console.log("\n========================================================");
         console.log(`[MOCK EMAIL SENT] Destinatário: ${order.customerName} <${order.customerEmail}>`);
         console.log(`Assunto: Xodó da Pretinha - Atualização [Código: ${order.trackingCode}]`);
