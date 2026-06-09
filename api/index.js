@@ -18,13 +18,13 @@ const PORT = process.env.PORT || 8080;
 
 app.use(cors());
 app.use(express.json());
-app.use(express.static(path.join(__dirname, '..')));
+app.use(express.static(process.cwd()));
 
 // Segredos e credenciais padrão
 const ADMIN_USER = process.env.ADMIN_USER || "admin";
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "adminxodo";
 const JWT_SECRET = process.env.JWT_SECRET || "xodo_pretinha_secret_2026";
-const DATA_FILE = path.join(__dirname, '..', 'data', 'orders.json');
+const DATA_FILE = path.join(process.cwd(), 'data', 'orders.json');
 
 // --- CONEXÃO COM SUPABASE ---
 const supabaseUrl = process.env.SUPABASE_URL || '';
@@ -219,7 +219,7 @@ async function triggerResendEmail(order) {
         default: templateName = "1_acquisition.html";
     }
     
-    const templatePath = path.join(__dirname, '..', 'templates', templateName);
+    const templatePath = path.join(process.cwd(), 'templates', templateName);
     
     try {
         if (fs.existsSync(templatePath)) {
@@ -526,9 +526,11 @@ app.delete('/api/orders/:code', requireAdmin, async (req, res) => {
     } else {
         res.status(404).json({ success: false, message: "Encomenda não encontrada ou erro ao excluir." });
     }
+});
+
 // 8. Rota coringa para servir o Frontend SPA (index.html)
 app.get('*', (req, res) => {
-    res.sendFile(path.join(__dirname, '..', 'index.html'));
+    res.sendFile(path.join(process.cwd(), 'index.html'));
 });
 
 // Apenas escutar porta se rodando localmente (não no Vercel serverless worker)
