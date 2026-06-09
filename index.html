@@ -34,36 +34,24 @@
                 </div>
 
                 <div class="glass-card gateway-card">
-                    <!-- Abas de Navegação do Login -->
-                    <div class="gateway-tabs">
-                        <button class="gateway-tab active" id="tab-client-btn">Acesso Cliente</button>
-                        <button class="gateway-tab" id="tab-admin-btn">Acesso Administrativo</button>
-                    </div>
-
-                    <!-- Formulário do Cliente -->
+                    <!-- Formulário do Cliente (Exibido por padrão na rota #/login) -->
                     <div class="gateway-form-pane active" id="pane-client">
                         <h2 class="form-pane-title">Rastrear Encomenda</h2>
-                        <p class="form-pane-subtitle">Insira o código de rastreamento recebido por e-mail ou WhatsApp.</p>
+                        <p class="form-pane-subtitle">Insira o seu código de rastreamento recebido por e-mail ou WhatsApp.</p>
                         
                         <form id="gateway-client-form">
                             <div class="form-group">
                                 <label for="gateway-tracking-code">Código de Rastreio</label>
-                                <input type="text" id="gateway-tracking-code" placeholder="Ex: XODO-PT-101" required autocomplete="off">
+                                <input type="text" id="gateway-tracking-code" placeholder="Digite seu código" required autocomplete="off">
                             </div>
                             <button type="submit" class="btn-primary" style="width: 100%; justify-content: center; margin-top: 1rem;">
                                 Acessar Rastreamento
                             </button>
                         </form>
-                        
-                        <div class="test-codes" style="margin-top: 2rem;">
-                            <span>Códigos de teste:</span>
-                            <span class="test-code-link" onclick="prefillGatewayCode('XODO-PT-101')">XODO-PT-101</span>
-                            <span class="test-code-link" onclick="prefillGatewayCode('XODO-PT-102')">XODO-PT-102</span>
-                        </div>
                     </div>
 
-                    <!-- Formulário do Administrador -->
-                    <div class="gateway-form-pane" id="pane-admin">
+                    <!-- Formulário do Administrador (Acessível via rota secreta #/portal-admin) -->
+                    <div class="gateway-form-pane" id="pane-admin" style="display: none;">
                         <h2 class="form-pane-title">Área Administrativa</h2>
                         <p class="form-pane-subtitle">Entre com suas credenciais de gestor da loja.</p>
                         
@@ -80,9 +68,6 @@
                                 Entrar no Painel
                             </button>
                         </form>
-                        <div class="test-codes" style="margin-top: 1.5rem; font-size: 0.8rem;">
-                            <span>Credenciais: usuário: <strong>admin</strong> | senha: <strong>adminxodo</strong></span>
-                        </div>
                     </div>
 
                     <!-- Mensagem de Erro -->

@@ -31,8 +31,6 @@ const viewClient = document.getElementById("view-client");
 const viewAdmin = document.getElementById("view-admin");
 
 // Gateway Login
-const tabClientBtn = document.getElementById("tab-client-btn");
-const tabAdminBtn = document.getElementById("tab-admin-btn");
 const paneClient = document.getElementById("pane-client");
 const paneAdmin = document.getElementById("pane-admin");
 const gatewayClientForm = document.getElementById("gateway-client-form");
@@ -195,6 +193,15 @@ function handleRouting() {
             window.location.hash = "#/login";
         }
     } 
+    else if (hash === "#/portal-admin") {
+        if (role === "admin") {
+            window.location.hash = "#/admin";
+        } else {
+            viewGateway.classList.add("active");
+            paneAdmin.classList.add("active");
+            paneClient.classList.remove("active");
+        }
+    }
     else { // #/login ou rota padrão
         if (role === "admin") {
             window.location.hash = "#/admin";
@@ -202,6 +209,8 @@ function handleRouting() {
             window.location.hash = "#/rastreio";
         } else {
             viewGateway.classList.add("active");
+            paneClient.classList.add("active");
+            paneAdmin.classList.remove("active");
         }
     }
 }
@@ -209,28 +218,6 @@ function handleRouting() {
 window.addEventListener("hashchange", handleRouting);
 
 // --- LÓGICA DO PORTAL DE LOGIN (GATEWAY) ---
-
-// Abas de Login
-tabClientBtn.addEventListener("click", () => {
-    tabClientBtn.classList.add("active");
-    tabAdminBtn.classList.remove("active");
-    paneClient.classList.add("active");
-    paneAdmin.classList.remove("active");
-    gatewayErrorBanner.style.display = "none";
-});
-
-tabAdminBtn.addEventListener("click", () => {
-    tabAdminBtn.classList.add("active");
-    tabClientBtn.classList.remove("active");
-    paneAdmin.classList.add("active");
-    paneClient.classList.remove("active");
-    gatewayErrorBanner.style.display = "none";
-});
-
-window.prefillGatewayCode = function(code) {
-    gatewayTrackingCode.value = code;
-    gatewayClientForm.dispatchEvent(new Event('submit'));
-};
 
 // Submit Login Cliente
 gatewayClientForm.addEventListener("submit", (e) => {
@@ -420,6 +407,9 @@ btnPrintSlip.addEventListener("click", () => {
 
 // --- PAINEL DO ADMINISTRADOR ---
 function loadAdminDashboard() {
+    if (!adminCodeInput.value) {
+        adminCodeInput.value = autoGenerateCode();
+    }
     fetchAdmin('/api/orders')
     .then(data => {
         if (data.success) {
@@ -559,6 +549,7 @@ adminCreateForm.addEventListener("submit", (e) => {
         if (data.success) {
             showToast("Encomenda cadastrada e e-mail disparado!", "success");
             adminCreateForm.reset();
+            adminCodeInput.value = autoGenerateCode();
             loadAdminDashboard();
         } else {
             showToast(data.message || "Erro ao cadastrar encomenda.", "error");
@@ -570,16 +561,22 @@ adminCreateForm.addEventListener("submit", (e) => {
     });
 });
 
-// Gerador de códigos
-adminGenerateBtn.addEventListener("click", () => {
+// Função para gerar código altamente aleatório
+function autoGenerateCode() {
     const prefix = "XODO";
-    const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-    let batch = "";
-    for (let i = 0; i < 3; i++) {
-        batch += chars.charAt(Math.floor(Math.random() * chars.length));
+    const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+    let part1 = "";
+    let part2 = "";
+    for (let i = 0; i < 4; i++) {
+        part1 += chars.charAt(Math.floor(Math.random() * chars.length));
+        part2 += chars.charAt(Math.floor(Math.random() * chars.length));
     }
-    const num = Math.floor(100 + Math.random() * 900);
-    const code = `${prefix}-${batch}-${num}`;
+    return `${prefix}-${part1}-${part2}`;
+}
+
+// Gerador de códigos no painel
+adminGenerateBtn.addEventListener("click", () => {
+    const code = autoGenerateCode();
     adminCodeInput.value = code;
     showToast(`Código gerado: ${code}`, "info");
 });
