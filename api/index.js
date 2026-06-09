@@ -1,5 +1,5 @@
 // SISTEMA DE RASTREIO - XODÓ DA PRETINHA
-// server.js (Express Backend Server - Full-Stack Cloud com Supabase)
+// api/index.js (Express Backend Server - Full-Stack Cloud com Supabase para Vercel Serverless)
 
 const express = require('express');
 const cors = require('cors');
@@ -18,13 +18,13 @@ const PORT = process.env.PORT || 8080;
 
 app.use(cors());
 app.use(express.json());
-app.use(express.static(__dirname));
+app.use(express.static(path.join(__dirname, '..')));
 
 // Segredos e credenciais padrão
 const ADMIN_USER = process.env.ADMIN_USER || "admin";
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "adminxodo";
 const JWT_SECRET = process.env.JWT_SECRET || "xodo_pretinha_secret_2026";
-const DATA_FILE = path.join(__dirname, 'data', 'orders.json');
+const DATA_FILE = path.join(__dirname, '..', 'data', 'orders.json');
 
 // --- CONEXÃO COM SUPABASE ---
 const supabaseUrl = process.env.SUPABASE_URL || '';
@@ -207,7 +207,7 @@ async function triggerResendEmail(order) {
     const eventDescription = latestEvent ? latestEvent.description : "Sua encomenda está avançando em nosso fluxo de entrega.";
     const eventTitle = latestEvent ? latestEvent.title : stageName;
 
-    const trackingLink = `http://localhost:${PORT}/#/rastreio?code=${order.trackingCode}`;
+    const trackingLink = `https://${process.env.VERCEL_URL || 'localhost:8080'}/#/rastreio?code=${order.trackingCode}`;
 
     let emailHtml = "";
     let templateName = "";
@@ -219,7 +219,7 @@ async function triggerResendEmail(order) {
         default: templateName = "1_acquisition.html";
     }
     
-    const templatePath = path.join(__dirname, 'templates', templateName);
+    const templatePath = path.join(__dirname, '..', 'templates', templateName);
     
     try {
         if (fs.existsSync(templatePath)) {
@@ -528,15 +528,20 @@ app.delete('/api/orders/:code', requireAdmin, async (req, res) => {
     }
 });
 
-// Inicialização
-app.listen(PORT, () => {
-    console.log(`\n🚀 Servidor Xodó da Pretinha Ativo: http://localhost:${PORT}`);
-    console.log(`📁 DB Contingência Local: ${DATA_FILE}`);
-    console.log(`🔑 Segredo JWT: ${JWT_SECRET.substring(0, 4)}***`);
-    if (process.env.RESEND_API_KEY && process.env.RESEND_API_KEY.startsWith('re_')) {
-        console.log("🔑 Disparos de e-mail reais do Resend ATIVOS.");
-    } else {
-        console.log("⚠️ Disparos de e-mail reais do Resend DESATIVADOS (Simulador local).");
-    }
-    console.log("========================================================\n");
-});
+// Apenas escutar porta se rodando localmente (não no Vercel serverless worker)
+if (process.env.NODE_ENV !== 'production' && require.main === module) {
+    app.listen(PORT, () => {
+        console.log(`\n🚀 Servidor Xodó da Pretinha Ativo: http://localhost:${PORT}`);
+        console.log(`📁 DB Contingência Local: ${DATA_FILE}`);
+        console.log(`🔑 Segredo JWT: ${JWT_SECRET.substring(0, 4)}***`);
+        if (process.env.RESEND_API_KEY && process.env.RESEND_API_KEY.startsWith('re_')) {
+            console.log("🔑 Disparos de e-mail reais do Resend ATIVOS.");
+        } else {
+            console.log("⚠️ Disparos de e-mail reais do Resend DESATIVADOS (Simulador local).");
+        }
+        console.log("========================================================\n");
+    });
+}
+
+// Exportar aplicativo Express para Vercel Serverless Functions
+module.exports = app;
