@@ -143,7 +143,6 @@ const adminProductPriceAoa = document.getElementById("admin-product-price-aoa");
 const adminProductImage = document.getElementById("admin-product-image");
 const adminProductStore = document.getElementById("admin-product-store");
 const adminProductStatus = document.getElementById("admin-product-status");
-const adminProductLink = document.getElementById("admin-product-link");
 const adminProductCancelBtn = document.getElementById("admin-product-cancel-btn");
 const adminProductSubmitBtn = document.getElementById("admin-product-submit-btn");
 const adminProductsList = document.getElementById("admin-products-list");
@@ -909,13 +908,6 @@ function renderCatalogGrid(products) {
                     <span class="product-price-aoa">${parseFloat(product.price_aoa).toLocaleString('pt-AO', { style: 'currency', currency: 'AOA' })}</span>
                     <span class="product-price-brl">Origem: R$ ${parseFloat(product.price_brl).toFixed(2)} BRL</span>
                 </div>
-                
-                ${product.original_link ? `
-                    <a href="${product.original_link}" target="_blank" class="btn-glass" style="margin-bottom: 0.75rem; text-align: center; border-radius: 8px; font-size: 0.85rem; padding: 0.5rem; display: flex; align-items: center; justify-content: center; gap: 0.25rem;">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
-                        Ver Loja Origem
-                    </a>
-                ` : ""}
 
                 <button class="btn-primary" style="width: 100%; justify-content: center; border-radius: 8px;" 
                     onclick="addToCartById(${product.id})" ${isOutOfStock ? "disabled" : ""}>
@@ -1601,7 +1593,7 @@ adminProductForm.addEventListener("submit", (e) => {
     const priceAoa = adminProductPriceAoa.value;
     const imageUrl = adminProductImage.value.trim();
     const originalStore = adminProductStore.value.trim();
-    const originalLink = adminProductLink.value.trim();
+    const originalLink = "";
     const status = adminProductStatus.value;
     
     const isEdit = !!productId;
@@ -1647,7 +1639,6 @@ window.editProduct = function(id) {
     adminProductPriceAoa.value = p.price_aoa;
     adminProductImage.value = p.image_url || "";
     adminProductStore.value = p.original_store || "";
-    adminProductLink.value = p.original_link || "";
     adminProductStatus.value = p.status || "available";
     
     adminProductFormTitle.innerHTML = `
