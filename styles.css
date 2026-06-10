@@ -525,14 +525,14 @@ header {
     .timeline-track::before {
         top: 20px;
         bottom: 20px;
-        left: 47px;
+        left: 57px;
         width: 4px;
         height: auto;
     }
     
     .timeline-progress-bar {
         top: 20px;
-        left: 47px;
+        left: 57px;
         width: 4px;
         height: 0%;
         transition: height 0.8s cubic-bezier(0.4, 0, 0.2, 1);
@@ -1139,6 +1139,226 @@ footer {
 
 footer p strong {
     color: var(--primary);
+}
+
+/* -------------------------------------------------------------
+   SMARTPHONE RESPONSIVENESS AND MOBILE VISUAL ENHANCEMENTS
+   ------------------------------------------------------------- */
+@media (max-width: 600px) {
+    /* Optimization of App Container padding */
+    .app-container {
+        padding: 1rem 0.75rem;
+    }
+
+    /* Main Header Stacking and Styling for Mobile */
+    header {
+        flex-direction: column;
+        gap: 1.25rem;
+        text-align: center;
+        margin-bottom: 2rem;
+        padding-bottom: 1.25rem;
+    }
+    .logo-container {
+        align-items: center;
+    }
+    .logo-main {
+        font-size: 1.75rem;
+        letter-spacing: 0.5px;
+    }
+    .logo-sub {
+        font-size: 0.75rem;
+        letter-spacing: 1.5px;
+    }
+    .nav-controls {
+        width: 100%;
+        justify-content: center;
+        gap: 0.75rem;
+        flex-wrap: wrap;
+    }
+    .btn-glass {
+        padding: 0.5rem 1.25rem;
+        font-size: 0.85rem;
+    }
+
+    /* Gateway/Login Container Optimization */
+    .gateway-container {
+        min-height: 75vh;
+        padding: 0.5rem;
+    }
+    .gateway-logo-area {
+        margin-bottom: 1.75rem;
+    }
+    .gateway-logo-area .logo-main {
+        font-size: 2.2rem !important;
+    }
+    .gateway-logo-area .logo-sub {
+        font-size: 0.9rem !important;
+        letter-spacing: 2px !important;
+    }
+    .gateway-form-pane {
+        padding: 1.5rem;
+    }
+    .form-group label {
+        font-size: 0.85rem;
+        margin-bottom: 0.4rem;
+    }
+    .form-group input, 
+    .form-group textarea, 
+    .form-group select {
+        padding: 0.75rem;
+        font-size: 16px !important; /* Prevents auto-zooming on iOS */
+    }
+
+    /* Bento Cards Padding reduction on mobile */
+    .glass-card {
+        padding: 1.25rem;
+        border-radius: 16px;
+        margin-bottom: 1.25rem;
+    }
+
+    /* Overview Header layout stack */
+    .overview-header {
+        flex-direction: column;
+        align-items: stretch;
+        text-align: center;
+        gap: 1.25rem;
+        margin-bottom: 1.5rem;
+    }
+    .overview-meta {
+        align-items: center !important;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+    .res-dates-holder {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.35rem;
+    }
+    .res-dates-holder span {
+        margin-left: 0 !important;
+        font-size: 0.85rem;
+    }
+    #btn-print-slip {
+        width: 100%;
+        justify-content: center;
+        padding: 0.6rem;
+    }
+
+    /* Timeline Section for Mobile */
+    .timeline-container {
+        padding: 1rem 0;
+    }
+    .timeline-track {
+        gap: 2rem;
+    }
+    .status-details-box {
+        padding: 1.25rem;
+        margin-top: 0.75rem;
+    }
+    .status-title-large {
+        font-size: 1.15rem;
+    }
+    .res-status-text {
+        font-size: 0.85rem;
+    }
+
+    /* Details lists and products on mobile */
+    .details-section-title {
+        font-size: 1.1rem;
+        margin-bottom: 1rem;
+    }
+    .product-item {
+        font-size: 0.88rem;
+        padding: 0.5rem 0;
+    }
+    .meta-info-row {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.25rem;
+        padding: 0.6rem 0;
+    }
+    .meta-info-value {
+        text-align: left;
+    }
+
+    /* Admin View Mobile optimizations */
+    .admin-stats-container {
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: 0.6rem !important;
+        margin-bottom: 1.5rem !important;
+    }
+    .stat-card {
+        padding: 1rem 0.5rem !important;
+    }
+    .stat-number {
+        font-size: 1.6rem !important;
+    }
+    .stat-label {
+        font-size: 0.75rem !important;
+    }
+    .order-manager-header {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    .order-manager-header > div {
+        max-width: 100% !important;
+        width: 100% !important;
+    }
+    .admin-order-top {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+    }
+    .admin-order-details p {
+        font-size: 0.85rem;
+    }
+    .admin-order-status-selector {
+        gap: 0.5rem;
+        padding: 0.4rem;
+    }
+    .admin-order-status-selector select {
+        width: 100%;
+    }
+    .admin-actions-row {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 0.5rem;
+    }
+    .admin-actions-row button {
+        width: 100%;
+        justify-content: center;
+        padding: 0.6rem;
+        font-size: 0.85rem;
+    }
+
+    /* Modals mobile optimizations */
+    .modal-content {
+        padding: 1.25rem;
+        width: 95%;
+    }
+    .modal-title {
+        font-size: 1.15rem;
+    }
+    .modal-actions {
+        flex-direction: column-reverse;
+        gap: 0.6rem;
+        margin-top: 1.25rem;
+    }
+    .modal-actions button {
+        width: 100%;
+        justify-content: center;
+        padding: 0.75rem;
+    }
+}
+
+@media (max-width: 400px) {
+    .admin-stats-container {
+        grid-template-columns: 1fr !important;
+    }
+    .logo-main {
+        font-size: 1.5rem;
+    }
 }
 
 /* -------------------------------------------------------------
