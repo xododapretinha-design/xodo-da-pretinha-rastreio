@@ -176,7 +176,7 @@ function handleRouting() {
         if (role === "admin") {
             viewAdmin.classList.add("active");
             mainHeader.style.display = "flex";
-            userDisplayName.textContent = "Modo Administrador 👑";
+            userDisplayName.textContent = "Modo Administrador";
             loadAdminDashboard();
         } else {
             window.location.hash = "#/login";
@@ -454,7 +454,9 @@ function renderAdminOrders(ordersList) {
     if (filteredOrders.length === 0) {
         adminOrdersList.innerHTML = `
             <div class="empty-state">
-                <div class="empty-state-icon">📦</div>
+                <div class="empty-state-icon" style="color: var(--text-muted); opacity: 0.5; display: inline-flex; align-items: center; justify-content: center; margin-bottom: 1rem;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
+                </div>
                 <p>Nenhuma encomenda cadastrada encontrada.</p>
             </div>
         `;

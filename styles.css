@@ -735,6 +735,42 @@ header {
     box-shadow: 0 8px 30px rgba(255, 71, 126, 0.1);
 }
 
+.stat-icon-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: rgba(255, 71, 126, 0.1);
+    color: var(--primary);
+    margin: 0 auto 1rem auto;
+    box-shadow: 0 4px 12px rgba(255, 71, 126, 0.1);
+    transition: var(--transition-smooth);
+}
+
+.stat-card:nth-child(2) .stat-icon-wrapper {
+    background: rgba(229, 169, 60, 0.1);
+    color: var(--accent-gold);
+    box-shadow: 0 4px 12px rgba(229, 169, 60, 0.1);
+}
+
+.stat-card.stat-transit .stat-icon-wrapper {
+    background: rgba(138, 63, 252, 0.1);
+    color: var(--secondary);
+    box-shadow: 0 4px 12px rgba(138, 63, 252, 0.1);
+}
+
+.stat-card.stat-done .stat-icon-wrapper {
+    background: rgba(14, 173, 105, 0.1);
+    color: var(--success);
+    box-shadow: 0 4px 12px rgba(14, 173, 105, 0.1);
+}
+
+.stat-card:hover .stat-icon-wrapper {
+    transform: scale(1.08);
+}
+
 .stat-number {
     display: block;
     font-size: 2.8rem;
