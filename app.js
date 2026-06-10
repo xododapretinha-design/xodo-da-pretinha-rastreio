@@ -161,6 +161,14 @@ const approveProtocolNote = document.getElementById("approve-protocol-note");
 const approveProtocolCloseBtn = document.getElementById("approve-protocol-close-btn");
 const approveProtocolCancelBtn = document.getElementById("approve-protocol-cancel-btn");
 
+// Modal de Confirmação de Sucesso Pós-Aprovação (Admin)
+const approvalSuccessModal = document.getElementById("approval-success-modal");
+const appSuccessOldCode = document.getElementById("app-success-old-code");
+const appSuccessNewCode = document.getElementById("app-success-new-code");
+const appSuccessWhatsAppBtn = document.getElementById("app-success-whatsapp-btn");
+const appSuccessCopyBtn = document.getElementById("app-success-copy-btn");
+const appSuccessCloseBtn = document.getElementById("app-success-close-btn");
+
 // Feedbacks
 const toastContainer = document.getElementById("toast-container");
 
@@ -1064,18 +1072,38 @@ window.removeCartItem = function(index) {
     }
 };
 
+let lastOrderDetails = null;
+
 // Checkout Submission (Geração do Protocolo)
 cartCheckoutForm.addEventListener("submit", (e) => {
     e.preventDefault();
     
     const customerName = cartCustomerName.value.trim();
     const customerEmail = cartCustomerEmail.value.trim();
+    const phone = document.getElementById("cart-customer-phone").value.trim();
     const destination = cartDestination.value.trim();
+    const deliveryMethod = document.getElementById("cart-delivery-method").value;
     const notes = cartNotes.value.trim();
     
-    // Formatar itens para o backend
+    const subtotalStr = cartTotalValue.textContent;
+    const totalItems = cart.reduce((sum, item) => sum + item.qty, 0);
     const productsArray = cart.map(item => `${item.name} [Tam: ${item.size}, Cor: ${item.color}] (${item.qty})`);
+    
+    // Salvar dados do pedido para o recibo e WhatsApp com mais estrutura e detalhes
+    lastOrderDetails = {
+        name: customerName,
+        phone: phone,
+        method: deliveryMethod,
+        total: subtotalStr,
+        itemsCount: totalItems,
+        itemsListFormatted: cart.map(item => `• *${item.qty}x ${item.name}* (Tam: ${item.size}, Cor: ${item.color})`).join("\n")
+    };
+    
+    const fullDestination = `${destination} | WhatsApp: ${phone} | Método: ${deliveryMethod}`;
     const initialNote = notes || "Pedido de protocolo gerado na sacola do cliente.";
+    
+    // Guardar os itens do carrinho atual antes de limpá-lo para popular o recibo
+    const cartItemsToReceipt = [...cart];
     
     fetch('/api/protocols', {
         method: 'POST',
@@ -1083,7 +1111,7 @@ cartCheckoutForm.addEventListener("submit", (e) => {
         body: JSON.stringify({
             customerName,
             customerEmail,
-            destination,
+            destination: fullDestination,
             products: productsArray,
             initialNote
         })
@@ -1091,10 +1119,34 @@ cartCheckoutForm.addEventListener("submit", (e) => {
     .then(res => res.json())
     .then(data => {
         if (data.success) {
+            lastOrderDetails.code = data.order.trackingCode;
+            
+            // Popular o recibo de sucesso com dados dinâmicos estilo boutique
+            document.getElementById("receipt-protocol-code").textContent = data.order.trackingCode;
+            document.getElementById("receipt-client-name").textContent = lastOrderDetails.name;
+            document.getElementById("receipt-delivery-method").textContent = lastOrderDetails.method;
+            document.getElementById("receipt-total-value").textContent = lastOrderDetails.total;
+            
+            // Renderizar itens no recibo
+            const receiptItemsListUl = document.getElementById("receipt-items-list-ul");
+            receiptItemsListUl.innerHTML = "";
+            cartItemsToReceipt.forEach(item => {
+                const li = document.createElement("li");
+                li.className = "receipt-item-row";
+                li.innerHTML = `
+                    <span class="receipt-item-name">
+                        ${item.name}
+                        <span class="receipt-item-details">Tam: ${item.size} | Cor: ${item.color}</span>
+                    </span>
+                    <span class="receipt-item-qty">x${item.qty}</span>
+                    <span class="receipt-item-price">${(parseFloat(item.price_aoa) * item.qty).toLocaleString('pt-AO', { style: 'currency', currency: 'AOA' })}</span>
+                `;
+                receiptItemsListUl.appendChild(li);
+            });
+            
             // Mostrar tela de sucesso
             cartCheckoutSection.style.display = "none";
             cartItemsList.innerHTML = "";
-            successProtocolCode.textContent = data.order.trackingCode;
             cartSuccessState.style.display = "block";
             
             // Limpar sacola
@@ -1112,10 +1164,33 @@ cartCheckoutForm.addEventListener("submit", (e) => {
     });
 });
 
+// Envio de Notificação via WhatsApp para a Loja
+window.sendWhatsAppNotification = function() {
+    if (!lastOrderDetails) return;
+    const WHATSAPP_STORE_PHONE = "244923000000"; // Número da loja
+    
+    const message = `🧾 *RECEBIMENTO DE PEDIDO - XODÓ DA PRETINHA*
+---------------------------------------------
+*Protocolo:* ${lastOrderDetails.code}
+*Cliente:* ${lastOrderDetails.name}
+*WhatsApp:* ${lastOrderDetails.phone}
+*Método:* ${lastOrderDetails.method}
+
+*Itens Solicitados:*
+${lastOrderDetails.itemsListFormatted}
+
+*Total Estimado:* ${lastOrderDetails.total}
+---------------------------------------------
+_Para validar seu pedido, por favor envie o comprovante de pagamento junto com esta mensagem._`;
+
+    const url = `https://api.whatsapp.com/send?phone=${WHATSAPP_STORE_PHONE}&text=${encodeURIComponent(message)}`;
+    window.open(url, "_blank");
+};
+
 // Clipboard e Limpeza
 window.copyProtocolToClipboard = function() {
-    const code = successProtocolCode.textContent;
-    navigator.clipboard.writeText(code)
+    if (!lastOrderDetails) return;
+    navigator.clipboard.writeText(lastOrderDetails.code)
     .then(() => showToast("Código copiado para a área de transferência!", "success"))
     .catch(() => showToast("Falha ao copiar código.", "error"));
 };
@@ -1228,10 +1303,13 @@ function renderAdminProtocols(protocols) {
                     Criado: <em>${formatDate(proto.createdAt)}</em>
                 </p>
             </div>
-            <div class="admin-actions-row" style="margin-top: 1rem;">
-                <button class="btn-small btn-small-primary" style="flex: 2;" onclick="openApproveProtocolModal('${proto.trackingCode}')">
+            <div class="admin-actions-row" style="margin-top: 1rem; gap: 0.5rem;">
+                <button class="btn-small btn-small-primary" style="flex: 2; display: flex; align-items: center; justify-content: center; gap: 0.25rem;" onclick="quickApproveProtocol('${proto.trackingCode}')">
                     <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                    Aprovar & Iniciar Rastreio
+                    Aprovação Rápida
+                </button>
+                <button class="btn-small btn-small-accent" style="flex: 0.7; display: flex; align-items: center; justify-content: center;" title="Aprovação Manual / Customizar" onclick="openApproveProtocolModal('${proto.trackingCode}')">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
                 </button>
                 <button class="btn-small btn-small-danger" style="flex: 1;" onclick="deleteOrder('${proto.trackingCode}')">
                     Excluir
@@ -1280,7 +1358,66 @@ approveProtocolGenerateCodeBtn.addEventListener("click", () => {
     approveProtocolNewCode.value = autoGenerateCode();
 });
 
-// Ação de aprovar
+// Modal de Confirmação de Sucesso Pós-Aprovação (Admin)
+function showApprovalSuccess(oldCode, newCode, customerName, destinationString) {
+    appSuccessOldCode.textContent = oldCode;
+    appSuccessNewCode.textContent = newCode;
+    
+    // Extrair o WhatsApp do destinationString (salvo no formato: "Luanda | WhatsApp: 923000000 | Método: Entrega...")
+    let clientPhone = "";
+    if (destinationString && destinationString.includes("WhatsApp:")) {
+        const parts = destinationString.split("|");
+        const waPart = parts.find(p => p.includes("WhatsApp:"));
+        if (waPart) {
+            clientPhone = waPart.replace("WhatsApp:", "").trim();
+        }
+    }
+    
+    // Se não encontrou no formato estruturado, tenta achar qualquer número de telefone de 9 dígitos
+    if (!clientPhone && destinationString) {
+        const phoneMatch = destinationString.match(/\b9\d{8}\b/);
+        if (phoneMatch) {
+            clientPhone = phoneMatch[0];
+        }
+    }
+    
+    // Sanitizar número de telefone (garantir prefixo de Angola 244 se tiver 9 dígitos)
+    let formattedPhone = clientPhone.replace(/\D/g, "");
+    if (formattedPhone.length === 9 && formattedPhone.startsWith("9")) {
+        formattedPhone = "244" + formattedPhone;
+    }
+    
+    // Configurar ação do botão do WhatsApp
+    appSuccessWhatsAppBtn.onclick = () => {
+        const message = `Olá *${customerName}*! Seu pedido (Protocolo: *${oldCode}*) foi aprovado e a compra dos itens já foi realizada no Brasil! 🎉
+        
+Seu código de rastreamento oficial é: *${newCode}*
+
+Acompanhe o trânsito da sua encomenda em tempo real através do link abaixo:
+${window.location.origin}/#/rastreio?code=${newCode}
+
+Agradecemos a preferência!
+*Xodó da Pretinha*`;
+        const url = `https://api.whatsapp.com/send?phone=${formattedPhone}&text=${encodeURIComponent(message)}`;
+        window.open(url, "_blank");
+    };
+    
+    // Configurar ação do botão de copiar
+    appSuccessCopyBtn.onclick = () => {
+        navigator.clipboard.writeText(newCode)
+        .then(() => showToast("Código de rastreio copiado!", "success"))
+        .catch(() => showToast("Falha ao copiar.", "error"));
+    };
+    
+    approvalSuccessModal.classList.add("active");
+}
+
+function closeApprovalSuccess() {
+    approvalSuccessModal.classList.remove("active");
+}
+appSuccessCloseBtn.addEventListener("click", closeApprovalSuccess);
+
+// Ação de aprovar (Manual)
 approveProtocolForm.addEventListener("submit", (e) => {
     e.preventDefault();
     
@@ -1313,6 +1450,9 @@ approveProtocolForm.addEventListener("submit", (e) => {
                 showToast("Protocolo aprovado e rastreamento oficial iniciado!", "success");
                 closeApproveProtocolModal();
                 loadAdminProtocols();
+                
+                // Exibir o modal de sucesso pós-aprovação
+                showApprovalSuccess(oldCode, newCode, proto.customerName, proto.destination);
             })
             .catch(err => {
                 console.error("Erro ao deletar protocolo antigo:", err);
@@ -1329,6 +1469,56 @@ approveProtocolForm.addEventListener("submit", (e) => {
         showToast("Erro ao conectar no servidor.", "error");
     });
 });
+
+// Aprovação Rápida em 1-Clique (Admin)
+window.quickApproveProtocol = function(code) {
+    const proto = loadedProtocols.find(o => o.trackingCode === code);
+    if (!proto) return;
+    
+    const newCode = autoGenerateCode();
+    const note = "Compra realizada no Brasil. Os produtos foram despachados para o nosso centro de empacotamento, iniciando a fase de preparação.";
+    
+    showToast("Processando aprovação rápida...", "info");
+    
+    // 1. Cadastrar encomenda real na Fase 1 (Aquisição)
+    fetchAdmin('/api/orders', {
+        method: 'POST',
+        body: JSON.stringify({
+            trackingCode: newCode,
+            customerName: proto.customerName,
+            customerEmail: proto.customerEmail,
+            destination: proto.destination,
+            products: proto.products.join(", "),
+            initialNote: note
+        })
+    })
+    .then(resCreate => {
+        if (resCreate.success) {
+            // 2. Excluir o protocolo antigo Fase 0
+            fetchAdmin(`/api/orders/${code}`, {
+                method: 'DELETE'
+            })
+            .then(resDelete => {
+                showToast(`Protocolo aprovado! Rastreio iniciado: ${newCode}`, "success");
+                loadAdminProtocols();
+                
+                // Exibir o modal de sucesso pós-aprovação
+                showApprovalSuccess(code, newCode, proto.customerName, proto.destination);
+            })
+            .catch(err => {
+                console.error("Erro ao deletar protocolo antigo:", err);
+                showToast("Novo rastreamento criado, mas falhou em limpar protocolo Fase 0.", "warning");
+                loadAdminProtocols();
+            });
+        } else {
+            showToast(resCreate.message || "Erro ao aprovar e gerar rastreamento.", "error");
+        }
+    })
+    .catch(err => {
+        console.error("Erro ao aprovar protocolo:", err);
+        showToast("Erro ao conectar no servidor.", "error");
+    });
+};
 
 // --- ABA 3: GERENCIAR CATÁLOGO DE PEÇAS ---
 let loadedAdminCatalog = [];
