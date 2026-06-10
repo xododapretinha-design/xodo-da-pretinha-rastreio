@@ -98,6 +98,69 @@ const editEmailInput = document.getElementById("edit-email");
 const editDestinationInput = document.getElementById("edit-destination");
 const editProductsInput = document.getElementById("edit-products");
 
+// --- NOVOS ELEMENTOS DO MARKETPLACE E SACOLA ---
+
+// Catálogo Vista Cliente
+const catalogSection = document.getElementById("catalog-section");
+const catalogGrid = document.getElementById("catalog-grid");
+const catalogSearch = document.getElementById("catalog-search");
+const btnGotoCatalog = document.getElementById("btn-goto-catalog");
+const btnGotoTracking = document.getElementById("btn-goto-tracking");
+const btnOpenCart = document.getElementById("btn-open-cart");
+const cartBadgeCount = document.getElementById("cart-badge-count");
+const gatewayCard = document.getElementById("gateway-card");
+
+// Sacola/Carrinho Lateral
+const cartDrawer = document.getElementById("cart-drawer");
+const cartDrawerBackdrop = document.getElementById("cart-drawer-backdrop");
+const cartItemsList = document.getElementById("cart-items-list");
+const cartCheckoutSection = document.getElementById("cart-checkout-section");
+const cartTotalValue = document.getElementById("cart-total-value");
+const cartCheckoutForm = document.getElementById("cart-checkout-form");
+const cartCustomerName = document.getElementById("cart-customer-name");
+const cartCustomerEmail = document.getElementById("cart-customer-email");
+const cartDestination = document.getElementById("cart-destination");
+const cartNotes = document.getElementById("cart-notes");
+const cartSuccessState = document.getElementById("cart-success-state");
+const successProtocolCode = document.getElementById("success-protocol-code");
+
+// Abas do Painel Administrativo
+const adminPanelOrders = document.getElementById("admin-panel-orders");
+const adminPanelProtocols = document.getElementById("admin-panel-protocols");
+const adminPanelCatalog = document.getElementById("admin-panel-catalog");
+const adminProtocolsBadge = document.getElementById("admin-protocols-badge");
+const adminProtocolsList = document.getElementById("admin-protocols-list");
+const adminProtocolsSearch = document.getElementById("admin-protocols-search");
+
+// Gerenciamento de Peças do Catálogo (Admin)
+const adminProductFormTitle = document.getElementById("admin-product-form-title");
+const adminProductForm = document.getElementById("admin-product-form");
+const adminProductId = document.getElementById("admin-product-id");
+const adminProductName = document.getElementById("admin-product-name");
+const adminProductDesc = document.getElementById("admin-product-desc");
+const adminProductPriceBrl = document.getElementById("admin-product-price-brl");
+const adminProductPriceAoa = document.getElementById("admin-product-price-aoa");
+const adminProductImage = document.getElementById("admin-product-image");
+const adminProductStore = document.getElementById("admin-product-store");
+const adminProductStatus = document.getElementById("admin-product-status");
+const adminProductLink = document.getElementById("admin-product-link");
+const adminProductCancelBtn = document.getElementById("admin-product-cancel-btn");
+const adminProductSubmitBtn = document.getElementById("admin-product-submit-btn");
+const adminProductsList = document.getElementById("admin-products-list");
+const adminProductSearch = document.getElementById("admin-product-search");
+
+// Modal de Aprovação de Protocolo (Admin)
+const approveProtocolModal = document.getElementById("approve-protocol-modal");
+const approveProtocolForm = document.getElementById("approve-protocol-form");
+const approveProtocolOldCode = document.getElementById("approve-protocol-old-code");
+const approveProtocolDisplayCode = document.getElementById("approve-protocol-display-code");
+const approveProtocolItemsList = document.getElementById("approve-protocol-items-list");
+const approveProtocolNewCode = document.getElementById("approve-protocol-new-code");
+const approveProtocolGenerateCodeBtn = document.getElementById("approve-protocol-generate-code-btn");
+const approveProtocolNote = document.getElementById("approve-protocol-note");
+const approveProtocolCloseBtn = document.getElementById("approve-protocol-close-btn");
+const approveProtocolCancelBtn = document.getElementById("approve-protocol-cancel-btn");
+
 // Feedbacks
 const toastContainer = document.getElementById("toast-container");
 
@@ -177,7 +240,7 @@ function handleRouting() {
             viewAdmin.classList.add("active");
             mainHeader.style.display = "flex";
             userDisplayName.textContent = "Modo Administrador";
-            loadAdminDashboard();
+            switchAdminTab('orders'); // Iniciar na aba de encomendas
         } else {
             window.location.hash = "#/login";
             showToast("Acesso administrativo negado. Identifique-se.", "error");
@@ -198,8 +261,13 @@ function handleRouting() {
             window.location.hash = "#/admin";
         } else {
             viewGateway.classList.add("active");
+            gatewayCard.style.display = "block";
             paneAdmin.classList.add("active");
             paneClient.classList.remove("active");
+            catalogSection.style.display = "none";
+            // Desativar botões do gateway
+            btnGotoCatalog.classList.remove("active");
+            btnGotoTracking.classList.remove("active");
         }
     }
     else { // #/login ou rota padrão
@@ -209,8 +277,8 @@ function handleRouting() {
             window.location.hash = "#/rastreio";
         } else {
             viewGateway.classList.add("active");
-            paneClient.classList.add("active");
-            paneAdmin.classList.remove("active");
+            // Iniciar exibindo o catálogo por padrão
+            switchGatewayView('catalog');
         }
     }
 }
@@ -731,23 +799,727 @@ modalEditForm.addEventListener("submit", (e) => {
     });
 });
 
-// --- INICIALIZAÇÃO INICIAL & PARÂMETROS URL ---
+// ==========================================================================
+// LÓGICA DO CLIENTE: CATÁLOGO DE PEÇAS & SACOLA DE COMPRAS
+// ==========================================================================
+
+let cart = [];
+
+// Alternar entre abas do Gateway (Catálogo vs Rastreio)
+window.switchGatewayView = function(view) {
+    if (view === 'catalog') {
+        btnGotoCatalog.classList.add("active");
+        btnGotoTracking.classList.remove("active");
+        catalogSection.style.display = "block";
+        gatewayCard.style.display = "none";
+        loadCatalog();
+    } else {
+        btnGotoCatalog.classList.remove("active");
+        btnGotoTracking.classList.add("active");
+        catalogSection.style.display = "none";
+        gatewayCard.style.display = "block";
+        paneClient.classList.add("active");
+        paneAdmin.classList.remove("active");
+        gatewayErrorBanner.style.display = "none";
+    }
+};
+
+// Abrir/Fechar Sacola Lateral
+window.toggleCartDrawer = function() {
+    cartDrawer.classList.toggle("active");
+    cartDrawerBackdrop.classList.toggle("active");
+    if (cartDrawer.classList.contains("active")) {
+        renderCart();
+    }
+};
+
+// Carregar Produtos do Catálogo Público
+let loadedProducts = [];
+function loadCatalog() {
+    catalogGrid.innerHTML = `
+        <div style="grid-column: 1/-1; text-align: center; padding: 3rem; color: var(--text-muted);">
+            <p>Carregando peças exclusivas do Brasil...</p>
+        </div>
+    `;
+    
+    fetch('/api/products')
+    .then(res => res.json())
+    .then(data => {
+        if (data.success) {
+            loadedProducts = data.products;
+            renderCatalogGrid(loadedProducts);
+        } else {
+            showToast("Erro ao carregar peças do catálogo.", "error");
+        }
+    })
+    .catch(err => {
+        console.error("Erro ao carregar catálogo:", err);
+        catalogGrid.innerHTML = `
+            <div style="grid-column: 1/-1; text-align: center; padding: 3rem; color: var(--error);">
+                <p>Falha ao conectar com o catálogo de produtos.</p>
+            </div>
+        `;
+    });
+}
+
+// Renderizar Grade do Catálogo
+function renderCatalogGrid(products) {
+    catalogGrid.innerHTML = "";
+    
+    const filterQuery = catalogSearch.value.toLowerCase().trim();
+    const filtered = products.filter(p => 
+        p.name.toLowerCase().includes(filterQuery) || 
+        (p.description && p.description.toLowerCase().includes(filterQuery)) ||
+        (p.original_store && p.original_store.toLowerCase().includes(filterQuery))
+    );
+    
+    if (filtered.length === 0) {
+        catalogGrid.innerHTML = `
+            <div style="grid-column: 1/-1; text-align: center; padding: 3rem; color: var(--text-muted);">
+                <p>Nenhum produto correspondente encontrado.</p>
+            </div>
+        `;
+        return;
+    }
+    
+    filtered.forEach(product => {
+        const card = document.createElement("div");
+        card.className = "product-card";
+        
+        const isOutOfStock = product.status === "out_of_stock";
+        const imgUrl = product.image_url || "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?auto=format&fit=crop&w=500&q=80";
+        
+        card.innerHTML = `
+            <div class="product-image-container" style="background-image: url('${imgUrl}');">
+                ${product.original_store ? `<span class="product-store-badge">${product.original_store}</span>` : ""}
+                ${isOutOfStock ? `<span class="product-status-badge">Esgotado</span>` : ""}
+            </div>
+            <div class="product-card-body">
+                <h3 class="product-card-title">${product.name}</h3>
+                <p class="product-card-description">${product.description || "Sem descrição disponível."}</p>
+                <div class="product-price-container">
+                    <span class="product-price-aoa">${parseFloat(product.price_aoa).toLocaleString('pt-AO', { style: 'currency', currency: 'AOA' })}</span>
+                    <span class="product-price-brl">Origem: R$ ${parseFloat(product.price_brl).toFixed(2)} BRL</span>
+                </div>
+                
+                ${product.original_link ? `
+                    <a href="${product.original_link}" target="_blank" class="btn-glass" style="margin-bottom: 0.75rem; text-align: center; border-radius: 8px; font-size: 0.85rem; padding: 0.5rem; display: flex; align-items: center; justify-content: center; gap: 0.25rem;">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
+                        Ver Loja Origem
+                    </a>
+                ` : ""}
+
+                <button class="btn-primary" style="width: 100%; justify-content: center; border-radius: 8px;" 
+                    onclick="addToCartById(${product.id})" ${isOutOfStock ? "disabled" : ""}>
+                    Adicionar à Sacola
+                </button>
+            </div>
+        `;
+        catalogGrid.appendChild(card);
+    });
+}
+
+// Filtro do Catálogo
+catalogSearch.addEventListener("input", () => {
+    renderCatalogGrid(loadedProducts);
+});
+
+// Adicionar Item à Sacola
+window.addToCartById = function(productId) {
+    const product = loadedProducts.find(p => p.id === productId);
+    if (!product) return;
+    
+    // Verificar se já existe com mesmo tamanho/cor padrão na sacola
+    const existing = cart.find(item => item.id === productId && item.size === "M" && item.color === "Cor padrão");
+    if (existing) {
+        existing.qty++;
+        showToast(`Quantidade de ${product.name} atualizada na sacola!`, "info");
+    } else {
+        cart.push({
+            id: product.id,
+            name: product.name,
+            price_aoa: product.price_aoa,
+            image_url: product.image_url,
+            size: "M",
+            color: "Cor padrão",
+            qty: 1
+        });
+        showToast(`${product.name} adicionado à sacola!`, "success");
+    }
+    
+    saveCart();
+    renderCart();
+};
+
+function saveCart() {
+    localStorage.setItem("xodo_cart", JSON.stringify(cart));
+}
+
+function loadCart() {
+    try {
+        cart = JSON.parse(localStorage.getItem("xodo_cart") || "[]");
+    } catch (e) {
+        cart = [];
+    }
+}
+
+// Renderizar Sacola/Carrinho
+function renderCart() {
+    cartItemsList.innerHTML = "";
+    
+    // Atualizar Badge de Quantidade
+    const totalQty = cart.reduce((sum, item) => sum + item.qty, 0);
+    if (totalQty > 0) {
+        cartBadgeCount.textContent = totalQty;
+        cartBadgeCount.style.display = "inline-block";
+    } else {
+        cartBadgeCount.style.display = "none";
+    }
+    
+    if (cart.length === 0) {
+        cartItemsList.innerHTML = `
+            <div class="cart-empty-state" style="text-align: center; padding: 4rem 1rem; color: var(--text-muted);">
+                <p>Sua sacola está vazia.</p>
+            </div>
+        `;
+        cartCheckoutSection.style.display = "none";
+        return;
+    }
+    
+    let subtotal = 0;
+    
+    cart.forEach((item, index) => {
+        const itemTotal = parseFloat(item.price_aoa) * item.qty;
+        subtotal += itemTotal;
+        const imgUrl = item.image_url || "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?auto=format&fit=crop&w=500&q=80";
+        
+        const row = document.createElement("div");
+        row.className = "cart-item";
+        row.innerHTML = `
+            <div class="cart-item-img" style="background-image: url('${imgUrl}');"></div>
+            <div class="cart-item-details">
+                <span class="cart-item-title">${item.name}</span>
+                <span class="cart-item-price">${parseFloat(item.price_aoa).toLocaleString('pt-AO', { style: 'currency', currency: 'AOA' })}</span>
+                
+                <div class="cart-item-selectors">
+                    <select class="cart-item-size-select" onchange="updateCartItemSize(${index}, this.value)">
+                        <option value="PP" ${item.size === "PP" ? "selected" : ""}>PP</option>
+                        <option value="P" ${item.size === "P" ? "selected" : ""}>P</option>
+                        <option value="M" ${item.size === "M" ? "selected" : ""}>M</option>
+                        <option value="G" ${item.size === "G" ? "selected" : ""}>G</option>
+                        <option value="GG" ${item.size === "GG" ? "selected" : ""}>GG</option>
+                        <option value="XG" ${item.size === "XG" ? "selected" : ""}>XG</option>
+                    </select>
+                    <input type="text" class="cart-item-color-input" placeholder="Cor" value="${item.color}" onchange="updateCartItemColor(${index}, this.value)">
+                </div>
+                
+                <div class="cart-item-qty-controls">
+                    <button type="button" class="cart-item-qty-btn" onclick="updateCartItemQty(${index}, -1)">-</button>
+                    <span style="font-size: 0.9rem; font-weight: 600; min-width: 20px; text-align: center;">${item.qty}</span>
+                    <button type="button" class="cart-item-qty-btn" onclick="updateCartItemQty(${index}, 1)">+</button>
+                </div>
+            </div>
+            <button type="button" class="cart-item-remove-btn" onclick="removeCartItem(${index})">&times;</button>
+        `;
+        cartItemsList.appendChild(row);
+    });
+    
+    cartTotalValue.textContent = subtotal.toLocaleString('pt-AO', { style: 'currency', currency: 'AOA' });
+    cartCheckoutSection.style.display = "block";
+    cartSuccessState.style.display = "none";
+}
+
+// Funções de atualização da sacola
+window.updateCartItemSize = function(index, value) {
+    if (cart[index]) {
+        cart[index].size = value;
+        saveCart();
+    }
+};
+
+window.updateCartItemColor = function(index, value) {
+    if (cart[index]) {
+        cart[index].color = value.trim() || "Cor padrão";
+        saveCart();
+    }
+};
+
+window.updateCartItemQty = function(index, change) {
+    if (cart[index]) {
+        cart[index].qty += change;
+        if (cart[index].qty <= 0) {
+            cart.splice(index, 1);
+        }
+        saveCart();
+        renderCart();
+    }
+};
+
+window.removeCartItem = function(index) {
+    if (cart[index]) {
+        showToast(`${cart[index].name} removido da sacola.`, "info");
+        cart.splice(index, 1);
+        saveCart();
+        renderCart();
+    }
+};
+
+// Checkout Submission (Geração do Protocolo)
+cartCheckoutForm.addEventListener("submit", (e) => {
+    e.preventDefault();
+    
+    const customerName = cartCustomerName.value.trim();
+    const customerEmail = cartCustomerEmail.value.trim();
+    const destination = cartDestination.value.trim();
+    const notes = cartNotes.value.trim();
+    
+    // Formatar itens para o backend
+    const productsArray = cart.map(item => `${item.name} [Tam: ${item.size}, Cor: ${item.color}] (${item.qty})`);
+    const initialNote = notes || "Pedido de protocolo gerado na sacola do cliente.";
+    
+    fetch('/api/protocols', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            customerName,
+            customerEmail,
+            destination,
+            products: productsArray,
+            initialNote
+        })
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.success) {
+            // Mostrar tela de sucesso
+            cartCheckoutSection.style.display = "none";
+            cartItemsList.innerHTML = "";
+            successProtocolCode.textContent = data.order.trackingCode;
+            cartSuccessState.style.display = "block";
+            
+            // Limpar sacola
+            cart = [];
+            saveCart();
+            renderCart();
+            showToast("Protocolo gerado com sucesso!", "success");
+        } else {
+            showToast(data.message || "Erro ao processar o seu protocolo.", "error");
+        }
+    })
+    .catch(err => {
+        console.error("Erro no checkout:", err);
+        showToast("Erro de rede ao enviar pedido.", "error");
+    });
+});
+
+// Clipboard e Limpeza
+window.copyProtocolToClipboard = function() {
+    const code = successProtocolCode.textContent;
+    navigator.clipboard.writeText(code)
+    .then(() => showToast("Código copiado para a área de transferência!", "success"))
+    .catch(() => showToast("Falha ao copiar código.", "error"));
+};
+
+window.closeSuccessAndReset = function() {
+    cartSuccessState.style.display = "none";
+    toggleCartDrawer();
+    cartCheckoutForm.reset();
+};
+
+// ==========================================================================
+// LÓGICA DO ADMINISTRADOR: GESTÃO DE CATÁLOGO & PROTOCOLOS
+// ==========================================================================
+
+// Alternar abas do painel admin
+window.switchAdminTab = function(tab) {
+    // Atualizar botões das abas
+    document.querySelectorAll(".admin-navigation-tabs button").forEach(btn => {
+        btn.classList.remove("active");
+    });
+    const activeBtn = document.getElementById(`admin-tab-${tab}-btn`);
+    if (activeBtn) activeBtn.classList.add("active");
+    
+    // Ocultar todas as abas
+    document.querySelectorAll(".admin-panel-tab-content").forEach(pane => {
+        pane.style.display = "none";
+    });
+    
+    // Exibir a aba ativa
+    const activePane = document.getElementById(`admin-panel-${tab}`);
+    if (activePane) activePane.style.display = "block";
+    
+    // Carregar os dados correspondentes
+    if (tab === 'orders') {
+        loadAdminDashboard();
+    } else if (tab === 'protocols') {
+        loadAdminProtocols();
+    } else if (tab === 'catalog') {
+        loadAdminCatalog();
+    }
+};
+
+// --- ABA 2: PROTOCOLOS DE COMPRA (STAGE 0) ---
+let loadedProtocols = [];
+function loadAdminProtocols() {
+    adminProtocolsList.innerHTML = `
+        <div style="grid-column: 1/-1; text-align: center; padding: 3rem; color: var(--text-muted);">
+            <p>Buscando protocolos de clientes...</p>
+        </div>
+    `;
+    
+    fetchAdmin('/api/orders')
+    .then(data => {
+        if (data.success) {
+            // Filtrar ordens na Fase 0
+            loadedProtocols = data.orders.filter(o => o.currentStage === 0);
+            
+            // Atualizar o badge indicador na aba admin
+            if (loadedProtocols.length > 0) {
+                adminProtocolsBadge.textContent = loadedProtocols.length;
+                adminProtocolsBadge.style.display = "inline-block";
+            } else {
+                adminProtocolsBadge.style.display = "none";
+            }
+            
+            renderAdminProtocols(loadedProtocols);
+        }
+    })
+    .catch(err => {
+        console.error("Erro ao carregar protocolos no admin:", err);
+    });
+}
+
+function renderAdminProtocols(protocols) {
+    adminProtocolsList.innerHTML = "";
+    
+    const searchVal = adminProtocolsSearch.value.toLowerCase().trim();
+    const filtered = protocols.filter(p => 
+        p.trackingCode.toLowerCase().includes(searchVal) ||
+        p.customerName.toLowerCase().includes(searchVal) ||
+        p.customerEmail.toLowerCase().includes(searchVal)
+    );
+    
+    if (filtered.length === 0) {
+        adminProtocolsList.innerHTML = `
+            <div class="empty-state" style="grid-column: 1/-1; text-align: center; padding: 3rem; color: var(--text-muted);">
+                <p>Nenhum protocolo pendente de processamento.</p>
+            </div>
+        `;
+        return;
+    }
+    
+    filtered.forEach(proto => {
+        const card = document.createElement("div");
+        card.className = "admin-order-card";
+        card.innerHTML = `
+            <div class="admin-order-top">
+                <span class="admin-order-code" style="color: var(--accent-gold);">${proto.trackingCode}</span>
+                <span class="badge" style="background: rgba(229,169,60,0.15); color: var(--accent-gold); border: 1px solid var(--accent-gold);">Fase 0: Protocolo</span>
+            </div>
+            <div class="admin-order-details">
+                <p>Cliente: <strong>${proto.customerName}</strong></p>
+                <p>E-mail: <strong>${proto.customerEmail}</strong></p>
+                <p>Destino: <strong>${proto.destination}</strong></p>
+                <p style="margin-top: 0.5rem; color: var(--accent-gold); font-weight: bold;">Ítens Pedidos:</p>
+                <ul style="padding-left: 1.25rem; font-size: 0.85rem; color: var(--text-main); margin-bottom: 0.5rem;">
+                    ${proto.products.map(p => `<li>${p}</li>`).join("")}
+                </ul>
+                <p style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.4rem;">
+                    Criado: <em>${formatDate(proto.createdAt)}</em>
+                </p>
+            </div>
+            <div class="admin-actions-row" style="margin-top: 1rem;">
+                <button class="btn-small btn-small-primary" style="flex: 2;" onclick="openApproveProtocolModal('${proto.trackingCode}')">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                    Aprovar & Iniciar Rastreio
+                </button>
+                <button class="btn-small btn-small-danger" style="flex: 1;" onclick="deleteOrder('${proto.trackingCode}')">
+                    Excluir
+                </button>
+            </div>
+        `;
+        adminProtocolsList.appendChild(card);
+    });
+}
+
+adminProtocolsSearch.addEventListener("input", () => {
+    renderAdminProtocols(loadedProtocols);
+});
+
+// Fluxo de aprovação do protocolo (Passagem de Fase 0 para Fase 1)
+window.openApproveProtocolModal = function(code) {
+    const proto = loadedProtocols.find(o => o.trackingCode === code);
+    if (!proto) return;
+    
+    approveProtocolOldCode.value = code;
+    approveProtocolDisplayCode.value = code;
+    
+    // Renderizar lista de itens
+    approveProtocolItemsList.innerHTML = "";
+    proto.products.forEach(item => {
+        const li = document.createElement("div");
+        li.textContent = `• ${item}`;
+        approveProtocolItemsList.appendChild(li);
+    });
+    
+    // Sugerir código de rastreamento real
+    approveProtocolNewCode.value = autoGenerateCode();
+    approveProtocolNote.value = "Compra realizada no Brasil. Os produtos foram despachados para o nosso centro de empacotamento, iniciando a fase de preparação.";
+    
+    approveProtocolModal.classList.add("active");
+};
+
+function closeApproveProtocolModal() {
+    approveProtocolModal.classList.remove("active");
+    approveProtocolForm.reset();
+}
+approveProtocolCloseBtn.addEventListener("click", closeApproveProtocolModal);
+approveProtocolCancelBtn.addEventListener("click", closeApproveProtocolModal);
+
+approveProtocolGenerateCodeBtn.addEventListener("click", () => {
+    approveProtocolNewCode.value = autoGenerateCode();
+});
+
+// Ação de aprovar
+approveProtocolForm.addEventListener("submit", (e) => {
+    e.preventDefault();
+    
+    const oldCode = approveProtocolOldCode.value;
+    const newCode = approveProtocolNewCode.value.trim().toUpperCase();
+    const note = approveProtocolNote.value.trim();
+    
+    const proto = loadedProtocols.find(o => o.trackingCode === oldCode);
+    if (!proto) return;
+    
+    // 1. Cadastrar encomenda real na Fase 1 (Aquisição)
+    fetchAdmin('/api/orders', {
+        method: 'POST',
+        body: JSON.stringify({
+            trackingCode: newCode,
+            customerName: proto.customerName,
+            customerEmail: proto.customerEmail,
+            destination: proto.destination,
+            products: proto.products.join(", "),
+            initialNote: note
+        })
+    })
+    .then(resCreate => {
+        if (resCreate.success) {
+            // 2. Excluir o protocolo antigo Fase 0
+            fetchAdmin(`/api/orders/${oldCode}`, {
+                method: 'DELETE'
+            })
+            .then(resDelete => {
+                showToast("Protocolo aprovado e rastreamento oficial iniciado!", "success");
+                closeApproveProtocolModal();
+                loadAdminProtocols();
+            })
+            .catch(err => {
+                console.error("Erro ao deletar protocolo antigo:", err);
+                showToast("Novo rastreamento criado, mas falhou em limpar protocolo Fase 0.", "warning");
+                closeApproveProtocolModal();
+                loadAdminProtocols();
+            });
+        } else {
+            showToast(resCreate.message || "Erro ao aprovar e gerar rastreamento.", "error");
+        }
+    })
+    .catch(err => {
+        console.error("Erro ao aprovar protocolo:", err);
+        showToast("Erro ao conectar no servidor.", "error");
+    });
+});
+
+// --- ABA 3: GERENCIAR CATÁLOGO DE PEÇAS ---
+let loadedAdminCatalog = [];
+function loadAdminCatalog() {
+    adminProductsList.innerHTML = `
+        <div style="text-align: center; padding: 2rem; color: var(--text-muted);">
+            <p>Carregando peças do catálogo...</p>
+        </div>
+    `;
+    
+    fetch('/api/products')
+    .then(res => res.json())
+    .then(data => {
+        if (data.success) {
+            loadedAdminCatalog = data.products;
+            renderAdminCatalogList(loadedAdminCatalog);
+        }
+    })
+    .catch(err => {
+        console.error("Erro ao listar catálogo admin:", err);
+    });
+}
+
+function renderAdminCatalogList(products) {
+    adminProductsList.innerHTML = "";
+    
+    const searchVal = adminProductSearch.value.toLowerCase().trim();
+    const filtered = products.filter(p => 
+        p.name.toLowerCase().includes(searchVal) ||
+        (p.original_store && p.original_store.toLowerCase().includes(searchVal))
+    );
+    
+    if (filtered.length === 0) {
+        adminProductsList.innerHTML = `
+            <div style="text-align: center; padding: 2rem; color: var(--text-muted);">
+                <p>Nenhum produto correspondente cadastrado.</p>
+            </div>
+        `;
+        return;
+    }
+    
+    filtered.forEach(p => {
+        const item = document.createElement("div");
+        item.className = "product-list-item";
+        
+        const isOutOfStock = p.status === "out_of_stock";
+        const imgUrl = p.image_url || "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?auto=format&fit=crop&w=500&q=80";
+        
+        item.innerHTML = `
+            <div class="product-list-item-img" style="background-image: url('${imgUrl}');"></div>
+            <div class="product-list-item-details">
+                <span class="product-list-item-name" style="${isOutOfStock ? 'text-decoration: line-through; opacity: 0.6;' : ''}">${p.name}</span>
+                <div class="product-list-item-prices">
+                    <span style="color: var(--accent-gold); font-weight: 600;">Kz ${parseFloat(p.price_aoa).toLocaleString('pt-AO')} AOA</span>
+                    <span style="margin-left: 0.5rem; opacity: 0.8;">| R$ ${parseFloat(p.price_brl).toFixed(2)} BRL</span>
+                    ${p.original_store ? `<span style="margin-left: 0.5rem; color: var(--primary);">[${p.original_store}]</span>` : ""}
+                </div>
+            </div>
+            <div class="product-list-item-actions">
+                <button class="btn-small btn-small-accent" style="padding: 0.35rem 0.6rem;" onclick="editProduct(${p.id})">Editar</button>
+                <button class="btn-small btn-small-danger" style="padding: 0.35rem 0.6rem;" onclick="deleteProduct(${p.id})">Excluir</button>
+            </div>
+        `;
+        adminProductsList.appendChild(item);
+    });
+}
+
+adminProductSearch.addEventListener("input", () => {
+    renderAdminCatalogList(loadedAdminCatalog);
+});
+
+// Cadastrar/Editar Produto no Catálogo
+adminProductForm.addEventListener("submit", (e) => {
+    e.preventDefault();
+    
+    const productId = adminProductId.value;
+    const name = adminProductName.value.trim();
+    const description = adminProductDesc.value.trim();
+    const priceBrl = adminProductPriceBrl.value;
+    const priceAoa = adminProductPriceAoa.value;
+    const imageUrl = adminProductImage.value.trim();
+    const originalStore = adminProductStore.value.trim();
+    const originalLink = adminProductLink.value.trim();
+    const status = adminProductStatus.value;
+    
+    const isEdit = !!productId;
+    const url = isEdit ? `/api/products/${productId}` : '/api/products';
+    const method = isEdit ? 'PUT' : 'POST';
+    
+    fetchAdmin(url, {
+        method,
+        body: JSON.stringify({
+            name,
+            description,
+            priceBrl,
+            priceAoa,
+            imageUrl,
+            originalStore,
+            originalLink,
+            status
+        })
+    })
+    .then(data => {
+        if (data.success) {
+            showToast(isEdit ? "Produto editado com sucesso!" : "Produto cadastrado no catálogo!", "success");
+            resetProductForm();
+            loadAdminCatalog();
+        } else {
+            showToast(data.message || "Erro ao gravar produto.", "error");
+        }
+    })
+    .catch(err => {
+        console.error("Erro ao enviar produto:", err);
+        showToast("Erro de conexão.", "error");
+    });
+});
+
+window.editProduct = function(id) {
+    const p = loadedAdminCatalog.find(prod => prod.id === id);
+    if (!p) return;
+    
+    adminProductId.value = p.id;
+    adminProductName.value = p.name;
+    adminProductDesc.value = p.description || "";
+    adminProductPriceBrl.value = p.price_brl;
+    adminProductPriceAoa.value = p.price_aoa;
+    adminProductImage.value = p.image_url || "";
+    adminProductStore.value = p.original_store || "";
+    adminProductLink.value = p.original_link || "";
+    adminProductStatus.value = p.status || "available";
+    
+    adminProductFormTitle.innerHTML = `
+        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+        Editar Produto
+    `;
+    adminProductSubmitBtn.textContent = "Salvar Alterações";
+    adminProductCancelBtn.style.display = "flex";
+};
+
+window.deleteProduct = function(id) {
+    if (confirm("Deseja realmente excluir este produto do catálogo?")) {
+        fetchAdmin(`/api/products/${id}`, {
+            method: 'DELETE'
+        })
+        .then(data => {
+            if (data.success) {
+                showToast("Produto removido do catálogo com sucesso.", "info");
+                loadAdminCatalog();
+            } else {
+                showToast("Erro ao remover produto.", "error");
+            }
+        })
+        .catch(err => {
+            console.error("Erro ao excluir produto:", err);
+        });
+    }
+};
+
+function resetProductForm() {
+    adminProductForm.reset();
+    adminProductId.value = "";
+    adminProductFormTitle.innerHTML = `
+        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
+        Adicionar Produto ao Catálogo
+    `;
+    adminProductSubmitBtn.textContent = "Adicionar Produto";
+    adminProductCancelBtn.style.display = "none";
+}
+adminProductCancelBtn.addEventListener("click", resetProductForm);
+
+// ==========================================================================
+// INICIALIZAÇÃO E INTEGRAÇÃO DE COMPRA/RASTREIO
+// ==========================================================================
+
 document.addEventListener("DOMContentLoaded", () => {
-    // 1. Validar parâmetro na URL
+    // Carregar sacola local
+    loadCart();
+    
+    // 1. Validar parâmetro de rastreio automático na URL
     const urlParams = new URLSearchParams(window.location.search);
     const urlCode = urlParams.get('code');
     
     if (urlCode) {
-        // Efetuar fetch público para validar se existe
         fetch(`/api/orders/${urlCode.trim().toUpperCase()}`)
         .then(res => res.json())
         .then(data => {
             if (data.success) {
-                // Auto-login de cliente
                 sessionStorage.setItem("xodo_user_role", "client");
                 sessionStorage.setItem("xodo_user_id", data.order.trackingCode);
                 
-                // Limpar URL query
+                // Limpar URL query para limpeza visual
                 const cleanUrl = window.location.protocol + "//" + window.location.host + window.location.pathname;
                 window.history.pushState({path:cleanUrl}, '', cleanUrl);
                 
@@ -763,7 +1535,24 @@ document.addEventListener("DOMContentLoaded", () => {
             handleRouting();
         });
     } else {
-        // Roteamento inicial padrão
         handleRouting();
     }
+    
+    // Pré-buscar quantidade de protocolos no background para atualizar badge na navegação se for admin
+    const role = sessionStorage.getItem("xodo_user_role");
+    if (role === "admin") {
+        fetchAdmin('/api/orders')
+        .then(data => {
+            if (data.success) {
+                const count = data.orders.filter(o => o.currentStage === 0).length;
+                if (count > 0) {
+                    adminProtocolsBadge.textContent = count;
+                    adminProtocolsBadge.style.display = "inline-block";
+                }
+            }
+        })
+        .catch(() => {});
+    }
 });
+
+

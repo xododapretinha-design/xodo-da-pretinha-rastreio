@@ -26,6 +26,7 @@ const ADMIN_USER = process.env.ADMIN_USER || "admin";
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "adminxodo";
 const JWT_SECRET = process.env.JWT_SECRET || "xodo_pretinha_secret_2026";
 const DATA_FILE = path.join(process.cwd(), 'data', 'orders.json');
+const PRODUCTS_FILE = path.join(process.cwd(), 'data', 'products.json');
 
 // --- CONEXÃO COM SUPABASE ---
 const supabaseUrl = process.env.SUPABASE_URL || '';
@@ -103,8 +104,35 @@ function saveLocalOrders() {
     }
 }
 
+let localProductsInMemory = [];
+function loadLocalProducts() {
+    try {
+        if (fs.existsSync(PRODUCTS_FILE)) {
+            const data = fs.readFileSync(PRODUCTS_FILE, 'utf8');
+            localProductsInMemory = JSON.parse(data);
+        } else {
+            const dir = path.dirname(PRODUCTS_FILE);
+            if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+            fs.writeFileSync(PRODUCTS_FILE, JSON.stringify([], null, 2));
+            localProductsInMemory = [];
+        }
+    } catch (e) {
+        localProductsInMemory = [];
+    }
+}
+loadLocalProducts();
+
+function saveLocalProducts() {
+    try {
+        fs.writeFileSync(PRODUCTS_FILE, JSON.stringify(localProductsInMemory, null, 2), 'utf8');
+    } catch (e) {
+        console.error("Falha ao salvar produtos locais:", e);
+    }
+}
+
 // --- DICIONÁRIOS E MAPADORES DE DADOS (SNAKE_CASE <-> CAMELCASE) ---
 const STAGE_NAMES = {
+    0: "Protocolo de Compra Solicitado",
     1: "Aquisição do Produto",
     2: "Empacotamento",
     3: "Envio para Angola",
@@ -112,6 +140,7 @@ const STAGE_NAMES = {
 };
 
 const STAGE_EMOJIS = {
+    0: "📝",
     1: "📦",
     2: "🏷️",
     3: "✈️",
@@ -213,11 +242,12 @@ async function triggerResendEmail(order) {
     let emailHtml = "";
     let templateName = "";
     switch(currentStage) {
+        case 0: templateName = "0_protocol.html"; break;
         case 1: templateName = "1_acquisition.html"; break;
         case 2: templateName = "2_packaging.html"; break;
         case 3: templateName = "3_shipping.html"; break;
         case 4: templateName = "4_reception.html"; break;
-        default: templateName = "1_acquisition.html";
+        default: templateName = "0_protocol.html";
     }
     
     const templatePath = path.join(process.cwd(), 'templates', templateName);
@@ -563,6 +593,171 @@ app.delete('/api/orders/:code', requireAdmin, async (req, res) => {
         res.status(200).json({ success: true, message: `Encomenda ${code} excluída com sucesso.` });
     } else {
         res.status(404).json({ success: false, message: "Encomenda não encontrada ou erro ao excluir." });
+    }
+});
+
+// --- NOVAS ROTAS DO MARKETPLACE (PRODUTOS & PROTOCOLOS) ---
+
+// 9. Listar produtos do catálogo
+app.get('/api/products', async (req, res) => {
+    try {
+        if (supabase) {
+            const { data, error } = await supabase.from('products').select('*').order('created_at', { ascending: false });
+            if (error) throw error;
+            return res.status(200).json({ success: true, products: data });
+        } else {
+            return res.status(200).json({ success: true, products: localProductsInMemory });
+        }
+    } catch (err) {
+        console.error("Erro ao listar produtos:", err.message);
+        res.status(500).json({ success: false, message: "Erro ao listar produtos do catálogo." });
+    }
+});
+
+// 10. Cadastrar produto no catálogo (Apenas Admin)
+app.post('/api/products', requireAdmin, async (req, res) => {
+    const { name, description, priceBrl, priceAoa, imageUrl, originalStore, originalLink } = req.body;
+    if (!name || priceBrl === undefined || priceAoa === undefined) {
+        return res.status(400).json({ success: false, message: "Nome, preço em BRL e preço em AOA são obrigatórios." });
+    }
+    
+    const newProduct = {
+        name,
+        description: description || "",
+        price_brl: parseFloat(priceBrl),
+        price_aoa: parseFloat(priceAoa),
+        image_url: imageUrl || "",
+        original_store: originalStore || "",
+        original_link: originalLink || "",
+        status: "available"
+    };
+    
+    try {
+        if (supabase) {
+            const { data, error } = await supabase.from('products').insert([newProduct]).select();
+            if (error) throw error;
+            return res.status(201).json({ success: true, product: data[0] });
+        } else {
+            const localProduct = { id: Date.now(), ...newProduct, created_at: new Date().toISOString() };
+            localProductsInMemory.unshift(localProduct);
+            saveLocalProducts();
+            return res.status(201).json({ success: true, product: localProduct });
+        }
+    } catch (err) {
+        console.error("Erro ao cadastrar produto:", err.message);
+        res.status(500).json({ success: false, message: "Erro ao cadastrar produto no catálogo." });
+    }
+});
+
+// 11. Editar produto do catálogo (Apenas Admin)
+app.put('/api/products/:id', requireAdmin, async (req, res) => {
+    const { id } = req.params;
+    const { name, description, priceBrl, priceAoa, imageUrl, originalStore, originalLink, status } = req.body;
+    
+    const updateData = {};
+    if (name !== undefined) updateData.name = name;
+    if (description !== undefined) updateData.description = description;
+    if (priceBrl !== undefined) updateData.price_brl = parseFloat(priceBrl);
+    if (priceAoa !== undefined) updateData.price_aoa = parseFloat(priceAoa);
+    if (imageUrl !== undefined) updateData.image_url = imageUrl;
+    if (originalStore !== undefined) updateData.original_store = originalStore;
+    if (originalLink !== undefined) updateData.original_link = originalLink;
+    if (status !== undefined) updateData.status = status;
+    
+    try {
+        if (supabase) {
+            const { data, error } = await supabase.from('products').update(updateData).eq('id', id).select();
+            if (error) throw error;
+            return res.status(200).json({ success: true, product: data[0] });
+        } else {
+            const idx = localProductsInMemory.findIndex(p => p.id === parseInt(id));
+            if (idx !== -1) {
+                localProductsInMemory[idx] = { ...localProductsInMemory[idx], ...updateData };
+                saveLocalProducts();
+                return res.status(200).json({ success: true, product: localProductsInMemory[idx] });
+            } else {
+                return res.status(404).json({ success: false, message: "Produto não encontrado." });
+            }
+        }
+    } catch (err) {
+        console.error("Erro ao editar produto:", err.message);
+        res.status(500).json({ success: false, message: "Erro ao editar produto no catálogo." });
+    }
+});
+
+// 12. Excluir produto do catálogo (Apenas Admin)
+app.delete('/api/products/:id', requireAdmin, async (req, res) => {
+    const { id } = req.params;
+    try {
+        if (supabase) {
+            const { error } = await supabase.from('products').delete().eq('id', id);
+            if (error) throw error;
+            return res.status(200).json({ success: true, message: "Produto excluído com sucesso." });
+        } else {
+            const idx = localProductsInMemory.findIndex(p => p.id === parseInt(id));
+            if (idx !== -1) {
+                localProductsInMemory.splice(idx, 1);
+                saveLocalProducts();
+                return res.status(200).json({ success: true, message: "Produto excluído com sucesso." });
+            } else {
+                return res.status(404).json({ success: false, message: "Produto não encontrado." });
+            }
+        }
+    } catch (err) {
+        console.error("Erro ao excluir produto:", err.message);
+        res.status(500).json({ success: false, message: "Erro ao excluir produto." });
+    }
+});
+
+// 13. Criar protocolo de cotação/compra (Público para Clientes)
+app.post('/api/protocols', async (req, res) => {
+    const { customerName, customerEmail, destination, products, initialNote } = req.body;
+    
+    if (!customerName || !customerEmail || !destination || !products) {
+        return res.status(400).json({ success: false, message: "Campos Nome, E-mail, Destino e Itens da Sacola são obrigatórios." });
+    }
+    
+    const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+    let part1 = "";
+    let part2 = "";
+    for (let i = 0; i < 4; i++) {
+        part1 += chars.charAt(Math.floor(Math.random() * chars.length));
+        part2 += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    const protocolCode = `XODO-REQ-${part1}-${part2}`;
+    
+    const nowISO = new Date().toISOString();
+    const newOrder = {
+        trackingCode: protocolCode,
+        customerName,
+        customerEmail,
+        destination,
+        products: Array.isArray(products) ? products : products.split(',').map(p => p.trim()).filter(p => p !== ""),
+        currentStage: 0,
+        createdAt: nowISO,
+        updatedAt: nowISO,
+        history: [
+            { stage: 0, title: "Protocolo de Pedido Gerado", description: initialNote || "Seu pedido de cotação foi enviado e está aguardando processamento e compra dos itens no Brasil pelo administrador.", timestamp: nowISO }
+        ]
+    };
+    
+    try {
+        if (supabase) {
+            const { error } = await supabase.from('orders').insert([toDb(newOrder)]);
+            if (error) {
+                console.error("Erro ao inserir protocolo no Supabase:", error);
+                return res.status(500).json({ success: false, message: "Erro ao registrar protocolo no banco cloud." });
+            }
+        } else {
+            localOrdersInMemory.unshift(newOrder);
+            saveLocalOrders();
+        }
+        
+        const emailResult = await triggerResendEmail(newOrder);
+        res.status(201).json({ success: true, order: newOrder, emailNotification: emailResult });
+    } catch (err) {
+        console.error("Erro de execução no protocolo:", err.message);
+        res.status(500).json({ success: false, message: "Erro ao processar protocolo." });
     }
 });
 

@@ -33,7 +33,40 @@
                     <p class="logo-sub" style="font-size: 1.1rem; letter-spacing: 4px;">Portal de Logística e Rastreio</p>
                 </div>
 
-                <div class="glass-card gateway-card">
+                <!-- Navigation Tabs inside Gateway -->
+                <div class="gateway-navigation-tabs no-print" style="margin-bottom: 2rem; display: flex; gap: 1rem; width: 100%; max-width: 1100px; justify-content: flex-start; align-items: center; flex-wrap: wrap;">
+                    <button class="btn-glass active" id="btn-goto-catalog" onclick="switchGatewayView('catalog')" style="border-radius: 12px; padding: 0.6rem 1.25rem;">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"></path><path d="M3 6h18"></path><path d="M16 10a4 4 0 0 1-8 0"></path></svg>
+                        Catálogo de Peças
+                    </button>
+                    <button class="btn-glass" id="btn-goto-tracking" onclick="switchGatewayView('tracking')" style="border-radius: 12px; padding: 0.6rem 1.25rem;">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                        Rastreio
+                    </button>
+                    <button class="btn-glass" id="btn-open-cart" onclick="toggleCartDrawer()" style="position: relative; border-radius: 12px; padding: 0.6rem 1.25rem; margin-left: auto;">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg>
+                        Sacola <span id="cart-badge-count" class="badge-count" style="display: none; background: var(--primary); color: #ffffff; border-radius: 50%; padding: 2px 6px; font-size: 0.7rem; font-weight: bold; margin-left: 5px;">0</span>
+                    </button>
+                </div>
+
+                <!-- CATALOG SECTION (Exibido sob a aba Catálogo) -->
+                <div id="catalog-section" class="catalog-section" style="width: 100%; max-width: 1100px;">
+                    <div class="catalog-header" style="margin-bottom: 2rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+                        <h2 class="form-title" style="margin: 0; font-family: var(--font-heading); color: var(--text-main); font-size: 1.8rem; display: flex; align-items: center; gap: 0.5rem;">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"></path><path d="M3 6h18"></path><path d="M16 10a4 4 0 0 1-8 0"></path></svg>
+                            Nosso Catálogo Brasil
+                        </h2>
+                        <div style="max-width: 300px; width: 100%;">
+                            <input type="text" id="catalog-search" placeholder="Buscar peças..." class="form-group" style="padding: 0.5rem 0.8rem; margin: 0; font-size: 0.85rem; border-radius: 8px; background: rgba(0,0,0,0.2); border: 1px solid var(--glass-border); color: var(--text-main);">
+                        </div>
+                    </div>
+                    
+                    <div id="catalog-grid" class="catalog-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 2rem; width: 100%;">
+                        <!-- Products inserted dynamically -->
+                    </div>
+                </div>
+
+                <div class="glass-card gateway-card" id="gateway-card" style="display: none; width: 100%; max-width: 480px;">
                     <!-- Formulário do Cliente (Exibido por padrão na rota #/login) -->
                     <div class="gateway-form-pane active" id="pane-client">
                         <h2 class="form-pane-title">Rastrear Encomenda</h2>
@@ -228,73 +261,198 @@
                 </div>
             </div>
 
-            <div class="admin-grid">
-                
-                <!-- Coluna Esquerda: Nova Encomenda -->
-                <div class="glass-card">
-                    <h2 class="form-title">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
-                        Nova Encomenda
-                    </h2>
-                    <form id="admin-create-form">
-                        
-                        <div class="form-group">
-                            <label for="admin-code">Código de Rastreio</label>
-                            <div class="input-code-wrapper">
-                                <input type="text" id="admin-code" placeholder="Ex: XODO-AO-2384" required>
-                                <button type="button" class="btn-accent" id="admin-generate-code-btn" style="padding: 0.5rem 1rem;">Gerar</button>
+
+            <!-- Admin Navigation Tabs -->
+            <div class="admin-navigation-tabs no-print" style="margin: 2rem 0; display: flex; gap: 1rem; width: 100%; justify-content: flex-start; align-items: center; border-bottom: 1px solid rgba(255, 255, 255, 0.05); padding-bottom: 1rem; flex-wrap: wrap;">
+                <button class="btn-glass active" id="admin-tab-orders-btn" onclick="switchAdminTab('orders')" style="border-radius: 8px; padding: 0.6rem 1.25rem; display: flex; align-items: center; gap: 0.5rem;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                    Encomendas & Rastreio
+                </button>
+                <button class="btn-glass" id="admin-tab-protocols-btn" onclick="switchAdminTab('protocols')" style="border-radius: 8px; padding: 0.6rem 1.25rem; display: flex; align-items: center; gap: 0.5rem; position: relative;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path><path d="M9 12h6"></path><path d="M9 16h6"></path></svg>
+                    Protocolos Recebidos
+                    <span id="admin-protocols-badge" class="badge-count" style="display: none; background: var(--primary); color: #ffffff; border-radius: 50%; padding: 2px 6px; font-size: 0.7rem; font-weight: bold;">0</span>
+                </button>
+                <button class="btn-glass" id="admin-tab-catalog-btn" onclick="switchAdminTab('catalog')" style="border-radius: 8px; padding: 0.6rem 1.25rem; display: flex; align-items: center; gap: 0.5rem;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"></path><path d="M3 6h18"></path><path d="M16 10a4 4 0 0 1-8 0"></path></svg>
+                    Gerenciar Catálogo
+                </button>
+            </div>
+
+            <!-- SUB-VIEW 1: ENCOMENDAS & RASTREIO -->
+            <div id="admin-panel-orders" class="admin-panel-tab-content">
+                <div class="admin-grid">
+                    
+                    <!-- Coluna Esquerda: Nova Encomenda -->
+                    <div class="glass-card">
+                        <h2 class="form-title">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
+                            Nova Encomenda
+                        </h2>
+                        <form id="admin-create-form">
+                            
+                            <div class="form-group">
+                                <label for="admin-code">Código de Rastreio</label>
+                                <div class="input-code-wrapper">
+                                    <input type="text" id="admin-code" placeholder="Ex: XODO-AO-2384" required>
+                                    <button type="button" class="btn-accent" id="admin-generate-code-btn" style="padding: 0.5rem 1rem;">Gerar</button>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="admin-client">Nome do Cliente</label>
+                                <input type="text" id="admin-client" placeholder="Nome completo" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="admin-email">E-mail do Cliente (Notificações)</label>
+                                <input type="email" id="admin-email" placeholder="cliente@exemplo.com" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="admin-destination">Destino (Cidade/Província)</label>
+                                <input type="text" id="admin-destination" placeholder="Ex: Luanda" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="admin-products">Produtos (Separados por vírgula)</label>
+                                <textarea id="admin-products" rows="3" placeholder="Ex: Vestido Pretinha Glow (1), Brinco Argola Ouro (2)" required></textarea>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="admin-initial-note">Nota de Status Inicial</label>
+                                <input type="text" id="admin-initial-note" placeholder="Ex: Pedido recebido e aguardando separação." required>
+                            </div>
+
+                            <button type="submit" class="btn-primary" style="width: 100%; justify-content: center; margin-top: 1rem;">
+                                Cadastrar Encomenda
+                            </button>
+                        </form>
+                    </div>
+
+                    <!-- Coluna Direita: Gestão de Encomendas -->
+                    <div class="glass-card">
+                        <div class="order-manager-header">
+                            <h2 class="form-title" style="margin-bottom: 0;">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                                Encomendas Cadastradas
+                            </h2>
+                            
+                            <div style="max-width: 250px; width: 100%;">
+                                <input type="text" id="admin-search" placeholder="Filtrar encomendas..." class="form-group" style="padding: 0.5rem 0.8rem; margin: 0; font-size: 0.85rem; border-radius: 8px;">
                             </div>
                         </div>
 
-                        <div class="form-group">
-                            <label for="admin-client">Nome do Cliente</label>
-                            <input type="text" id="admin-client" placeholder="Nome completo" required>
+                        <div class="admin-orders-list" id="admin-orders-list">
+                            <!-- Dynamic list of orders in management dashboard -->
                         </div>
+                    </div>
 
-                        <div class="form-group">
-                            <label for="admin-email">E-mail do Cliente (Notificações)</label>
-                            <input type="email" id="admin-email" placeholder="cliente@exemplo.com" required>
-                        </div>
-
-                        <div class="form-group">
-                            <label for="admin-destination">Destino (Cidade/Província)</label>
-                            <input type="text" id="admin-destination" placeholder="Ex: Luanda" required>
-                        </div>
-
-                        <div class="form-group">
-                            <label for="admin-products">Produtos (Separados por vírgula)</label>
-                            <textarea id="admin-products" rows="3" placeholder="Ex: Vestido Pretinha Glow (1), Brinco Argola Ouro (2)" required></textarea>
-                        </div>
-
-                        <div class="form-group">
-                            <label for="admin-initial-note">Nota de Status Inicial</label>
-                            <input type="text" id="admin-initial-note" placeholder="Ex: Pedido recebido e aguardando separação." required>
-                        </div>
-
-                        <button type="submit" class="btn-primary" style="width: 100%; justify-content: center; margin-top: 1rem;">
-                            Cadastrar Encomenda
-                        </button>
-                    </form>
                 </div>
+            </div>
 
-                <!-- Coluna Direita: Gestão de Encomendas -->
-                <div class="glass-card">
+            <!-- SUB-VIEW 2: PROTOCOLOS RECEBIDOS -->
+            <div id="admin-panel-protocols" class="admin-panel-tab-content" style="display: none;">
+                <div class="glass-card" style="width: 100%;">
                     <div class="order-manager-header">
-                        <h2 class="form-title" style="margin-bottom: 0;">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-                            Encomendas Cadastradas
+                        <h2 class="form-title" style="margin-bottom: 0; display: flex; align-items: center; gap: 0.5rem;">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path><path d="M9 12h6"></path><path d="M9 16h6"></path></svg>
+                            Fase 0: Protocolos de Compra Solicitados
                         </h2>
-                        
                         <div style="max-width: 250px; width: 100%;">
-                            <input type="text" id="admin-search" placeholder="Filtrar encomendas..." class="form-group" style="padding: 0.5rem 0.8rem; margin: 0; font-size: 0.85rem; border-radius: 8px;">
+                            <input type="text" id="admin-protocols-search" placeholder="Filtrar protocolos..." class="form-group" style="padding: 0.5rem 0.8rem; margin: 0; font-size: 0.85rem; border-radius: 8px; background: rgba(0,0,0,0.2); border: 1px solid var(--glass-border); color: var(--text-main);">
+                        </div>
+                    </div>
+                    
+                    <div class="admin-protocols-list" id="admin-protocols-list" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 1.5rem; margin-top: 1.5rem; width: 100%;">
+                        <!-- Protocols loaded dynamically -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- SUB-VIEW 3: GERENCIAR CATÁLOGO -->
+            <div id="admin-panel-catalog" class="admin-panel-tab-content" style="display: none;">
+                <div class="admin-grid">
+                    
+                    <!-- Coluna Esquerda: Cadastrar/Editar Produto -->
+                    <div class="glass-card">
+                        <h2 class="form-title" id="admin-product-form-title">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
+                            Adicionar Produto ao Catálogo
+                        </h2>
+                        <form id="admin-product-form">
+                            <input type="hidden" id="admin-product-id">
+                            
+                            <div class="form-group">
+                                <label for="admin-product-name">Nome do Produto</label>
+                                <input type="text" id="admin-product-name" placeholder="Ex: Vestido Pretinha Glow" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="admin-product-desc">Descrição</label>
+                                <textarea id="admin-product-desc" rows="2" placeholder="Detalhes, tecido, caimento..."></textarea>
+                            </div>
+
+                            <div class="form-group" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                                <div class="form-sub-group">
+                                    <label for="admin-product-price-brl">Preço Brasil (BRL R$)</label>
+                                    <input type="number" id="admin-product-price-brl" placeholder="Ex: 89.90" step="0.01" required>
+                                </div>
+                                <div class="form-sub-group">
+                                    <label for="admin-product-price-aoa">Preço Angola (AOA Kz)</label>
+                                    <input type="number" id="admin-product-price-aoa" placeholder="Ex: 25000" step="0.01" required>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="admin-product-image">URL da Imagem</label>
+                                <input type="url" id="admin-product-image" placeholder="https://exemplo.com/foto.jpg">
+                            </div>
+
+                            <div class="form-group" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                                <div class="form-sub-group">
+                                    <label for="admin-product-store">Loja de Origem</label>
+                                    <input type="text" id="admin-product-store" placeholder="Ex: Zara">
+                                </div>
+                                <div class="form-sub-group">
+                                    <label for="admin-product-status">Status</label>
+                                    <select id="admin-product-status">
+                                        <option value="available">Disponível</option>
+                                        <option value="out_of_stock">Sem Estoque</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="admin-product-link">Link Original do Produto</label>
+                                <input type="url" id="admin-product-link" placeholder="Link direto para compra no Brasil">
+                            </div>
+
+                            <div style="display: flex; gap: 1rem; margin-top: 1rem;">
+                                <button type="button" id="admin-product-cancel-btn" class="btn-glass" style="display: none; flex: 1; justify-content: center; border-radius: 8px;">Cancelar</button>
+                                <button type="submit" id="admin-product-submit-btn" class="btn-primary" style="flex: 2; justify-content: center;">Adicionar Produto</button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- Coluna Direita: Lista de Produtos no Catálogo -->
+                    <div class="glass-card">
+                        <div class="order-manager-header">
+                            <h2 class="form-title" style="margin-bottom: 0; display: flex; align-items: center; gap: 0.5rem;">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"></path><path d="M3 6h18"></path><path d="M16 10a4 4 0 0 1-8 0"></path></svg>
+                                Peças Cadastradas
+                            </h2>
+                            <div style="max-width: 200px; width: 100%;">
+                                <input type="text" id="admin-product-search" placeholder="Filtrar peças..." class="form-group" style="padding: 0.5rem 0.8rem; margin: 0; font-size: 0.85rem; border-radius: 8px; background: rgba(0,0,0,0.2); border: 1px solid var(--glass-border); color: var(--text-main);">
+                            </div>
+                        </div>
+
+                        <div class="admin-products-list" id="admin-products-list" style="margin-top: 1.5rem; display: flex; flex-direction: column; gap: 1rem; max-height: 550px; overflow-y: auto; padding-right: 5px;">
+                            <!-- Products loaded dynamically -->
                         </div>
                     </div>
 
-                    <div class="admin-orders-list" id="admin-orders-list">
-                        <!-- Dynamic list of orders in management dashboard -->
-                    </div>
                 </div>
-
             </div>
         </main>
 
@@ -379,6 +537,128 @@
             </form>
         </div>
     </div>
+
+    <!-- MODAL APROVAR PROTOCOLO -->
+    <div class="modal-backdrop" id="approve-protocol-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Aprovar Protocolo & Iniciar Rastreio</h3>
+                <button class="modal-close" id="approve-protocol-close-btn">&times;</button>
+            </div>
+            <form id="approve-protocol-form">
+                <input type="hidden" id="approve-protocol-old-code">
+                
+                <div class="form-group">
+                    <label>Código de Protocolo Original</label>
+                    <input type="text" id="approve-protocol-display-code" readonly style="background: rgba(255,255,255,0.05); color: var(--text-muted);">
+                </div>
+
+                <div class="form-group" style="background: rgba(255, 71, 126, 0.05); padding: 1rem; border-radius: 8px; border: 1px solid var(--glass-border); margin-bottom: 1.5rem;">
+                    <span style="font-size: 0.85rem; color: var(--accent-gold); font-weight: bold; display: block; margin-bottom: 0.5rem;">ÍTENS A COMPRAR NO BRASIL:</span>
+                    <div id="approve-protocol-items-list" style="font-size: 0.9rem; line-height: 1.4; color: var(--text-main);">
+                        <!-- Items list -->
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="approve-protocol-new-code">Novo Código de Rastreio (Fase 1)</label>
+                    <div class="input-code-wrapper">
+                        <input type="text" id="approve-protocol-new-code" placeholder="Ex: XODO-AO-8943" required>
+                        <button type="button" class="btn-accent" id="approve-protocol-generate-code-btn" style="padding: 0.5rem 1rem;">Gerar</button>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="approve-protocol-note">Nota de Status Inicial (Fase 1: Aquisição)</label>
+                    <textarea id="approve-protocol-note" rows="3" placeholder="Ex: Compra realizada no Brasil. Os produtos foram despachados para o nosso centro de empacotamento." required></textarea>
+                </div>
+
+                <div class="modal-actions">
+                    <button type="button" class="btn-glass" id="approve-protocol-cancel-btn">Cancelar</button>
+                    <button type="submit" class="btn-primary">Aprovar e Enviar E-mail</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- CART DRAWER / SACOLA LATERAL -->
+    <div class="cart-drawer-backdrop" id="cart-drawer-backdrop" onclick="toggleCartDrawer()"></div>
+    <div class="cart-drawer" id="cart-drawer">
+        <div class="cart-drawer-header">
+            <h3 class="cart-title" style="display: flex; align-items: center; gap: 0.5rem; margin: 0; font-size: 1.3rem;">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg>
+                Sua Sacola
+            </h3>
+            <button class="cart-close-btn" onclick="toggleCartDrawer()" style="background: none; border: none; color: var(--text-main); font-size: 2rem; cursor: pointer; line-height: 1;">&times;</button>
+        </div>
+
+        <div class="cart-drawer-body" style="display: flex; flex-direction: column; height: calc(100% - 60px); overflow-y: auto; padding: 1.5rem 0;">
+            <!-- Cart Items List -->
+            <div class="cart-items-list" id="cart-items-list" style="display: flex; flex-direction: column; gap: 1.25rem; flex: 1;">
+                <div class="cart-empty-state" style="text-align: center; padding: 3rem 1rem; color: var(--text-muted);">
+                    <p>Sua sacola está vazia.</p>
+                </div>
+            </div>
+
+            <!-- Cart Summary & Checkout Form -->
+            <div class="cart-checkout-section" id="cart-checkout-section" style="display: none; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 1.5rem; margin-top: 1.5rem;">
+                <div class="cart-total-row" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; font-size: 1.1rem;">
+                    <span>Total Estimado:</span>
+                    <strong id="cart-total-value" style="color: var(--accent-gold); font-size: 1.25rem;">0,00 AOA</strong>
+                </div>
+
+                <form id="cart-checkout-form">
+                    <h4 style="font-family: var(--font-body); font-size: 0.95rem; font-weight: 600; color: var(--accent-gold); margin-bottom: 1rem; text-transform: uppercase; letter-spacing: 1px;">Dados de Entrega</h4>
+                    
+                    <div class="form-group">
+                        <label for="cart-customer-name">Seu Nome</label>
+                        <input type="text" id="cart-customer-name" placeholder="Nome completo" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="cart-customer-email">Seu E-mail</label>
+                        <input type="email" id="cart-customer-email" placeholder="Para receber atualizações" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="cart-destination">Destino (Cidade/Província em Angola)</label>
+                        <input type="text" id="cart-destination" placeholder="Ex: Luanda, Talatona" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="cart-notes">Notas Especiais (Opcional)</label>
+                        <textarea id="cart-notes" placeholder="Alguma observação sobre cores, tamanhos ou entrega..." rows="2"></textarea>
+                    </div>
+
+                    <button type="submit" class="btn-primary" style="width: 100%; justify-content: center; margin-top: 1.5rem;">
+                        Enviar Pedido e Gerar Protocolo
+                    </button>
+                </form>
+            </div>
+
+            <!-- Checkout Success State -->
+            <div class="cart-success-state" id="cart-success-state" style="display: none; padding: 2rem 1.5rem; text-align: center;">
+                <div class="success-icon-wrapper" style="color: var(--success); text-align: center; margin-bottom: 1.5rem; display: flex; justify-content: center;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                </div>
+                <h3 style="font-family: var(--font-heading); color: var(--text-main); font-size: 1.5rem; text-align: center; margin-bottom: 0.5rem;">Pedido Enviado!</h3>
+                <p style="text-align: center; font-size: 0.9rem; color: var(--text-muted); margin-bottom: 1.5rem; line-height: 1.5;">
+                    Seu protocolo de compra foi gerado com sucesso. Anote o código abaixo para consultar o andamento:
+                </p>
+                <div class="protocol-code-display" id="success-protocol-code" style="background: rgba(255, 71, 126, 0.1); border: 1px dashed var(--primary); padding: 1rem; border-radius: 8px; font-family: monospace; font-size: 1.15rem; font-weight: bold; text-align: center; color: var(--accent-gold); margin-bottom: 1.5rem; letter-spacing: 1px; word-break: break-all;">
+                    XODO-REQ-XXXX-XXXX
+                </div>
+                <button type="button" onclick="copyProtocolToClipboard()" class="btn-glass" style="width: 100%; justify-content: center; margin-bottom: 1rem; border-radius: 8px; display: flex; align-items: center; gap: 0.5rem;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                    Copiar Código
+                </button>
+                <button type="button" onclick="closeSuccessAndReset()" class="btn-primary" style="width: 100%; justify-content: center; border-radius: 8px;">
+                    Voltar ao Catálogo
+                </button>
+            </div>
+        </div>
+    </div>
+
 
     <!-- TOAST NOTIFICATION CONTAINER -->
     <div class="toast-container" id="toast-container"></div>

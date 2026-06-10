@@ -1592,3 +1592,383 @@ footer p strong {
         color: #333333 !important;
     }
 }
+
+/* ==========================================================================
+   E-COMMERCE & MARKETPLACE STYLES (CATÁLOGO & SACOLA & TABS)
+   ========================================================================== */
+
+/* Abas de Navegação Admin */
+.admin-navigation-tabs .btn-glass.active {
+    background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%) !important;
+    border-color: transparent !important;
+    box-shadow: 0 0 15px rgba(255, 71, 126, 0.4);
+}
+
+.admin-navigation-tabs .btn-glass {
+    transition: var(--transition-smooth);
+}
+
+.badge-count {
+    background: var(--primary);
+    color: #ffffff;
+    border-radius: 20px;
+    padding: 2px 8px;
+    font-size: 0.75rem;
+    font-weight: bold;
+    min-width: 20px;
+    text-align: center;
+    box-shadow: 0 0 8px rgba(255, 71, 126, 0.6);
+}
+
+/* Catálogo de Peças (Cliente) */
+.catalog-section {
+    animation: fadeIn 0.4s ease;
+}
+
+.catalog-grid {
+    margin-bottom: 3rem;
+}
+
+.product-card {
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    border-radius: 16px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    transition: var(--transition-smooth);
+    position: relative;
+    backdrop-filter: blur(10px);
+}
+
+.product-card:hover {
+    transform: translateY(-8px);
+    border-color: var(--glass-border-focus);
+    box-shadow: 0 12px 30px rgba(138, 63, 252, 0.2);
+}
+
+.product-image-container {
+    position: relative;
+    width: 100%;
+    padding-top: 125%; /* 4:5 Aspect Ratio */
+    background-color: rgba(255, 255, 255, 0.03);
+    background-size: cover;
+    background-position: center;
+}
+
+.product-store-badge {
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    background: rgba(11, 6, 18, 0.75);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(4px);
+    color: var(--accent-gold);
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.product-status-badge {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    background: var(--error);
+    color: #ffffff;
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.product-card-body {
+    padding: 1.25rem;
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+}
+
+.product-card-title {
+    font-family: var(--font-body);
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--text-main);
+    margin-bottom: 0.5rem;
+    line-height: 1.3;
+}
+
+.product-card-description {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    margin-bottom: 1rem;
+    line-height: 1.4;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    height: 2.8rem;
+}
+
+.product-price-container {
+    margin-top: auto;
+    margin-bottom: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+}
+
+.product-price-aoa {
+    color: var(--accent-gold);
+    font-size: 1.35rem;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+}
+
+.product-price-brl {
+    color: var(--text-muted);
+    font-size: 0.85rem;
+    font-weight: 400;
+}
+
+/* Sacola Lateral (Cart Drawer) */
+.cart-drawer-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(5px);
+    z-index: 1000;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.4s ease;
+}
+
+.cart-drawer-backdrop.active {
+    opacity: 1;
+    pointer-events: all;
+}
+
+.cart-drawer {
+    position: fixed;
+    top: 0;
+    right: -460px;
+    width: 460px;
+    max-width: 100vw;
+    height: 100vh;
+    background: rgba(17, 9, 26, 0.96);
+    border-left: 1px solid var(--glass-border);
+    box-shadow: -10px 0 30px rgba(0, 0, 0, 0.7);
+    z-index: 1001;
+    transition: right 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+    display: flex;
+    flex-direction: column;
+    padding: 2rem;
+    backdrop-filter: blur(20px);
+}
+
+.cart-drawer.active {
+    right: 0;
+}
+
+.cart-drawer-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    padding-bottom: 1rem;
+}
+
+.cart-items-list {
+    overflow-y: auto;
+    padding-right: 5px;
+}
+
+.cart-item {
+    display: flex;
+    gap: 1rem;
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    padding: 1rem;
+    border-radius: 12px;
+    position: relative;
+    transition: var(--transition-smooth);
+}
+
+.cart-item:hover {
+    border-color: rgba(255, 71, 126, 0.2);
+}
+
+.cart-item-img {
+    width: 70px;
+    height: 85px;
+    border-radius: 8px;
+    background-size: cover;
+    background-position: center;
+    background-color: rgba(255,255,255,0.02);
+}
+
+.cart-item-details {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.cart-item-title {
+    font-size: 0.95rem;
+    font-weight: 600;
+    line-height: 1.3;
+    padding-right: 1.5rem;
+    color: var(--text-main);
+}
+
+.cart-item-price {
+    color: var(--accent-gold);
+    font-weight: 700;
+    font-size: 1rem;
+    margin-top: 0.25rem;
+}
+
+.cart-item-selectors {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+}
+
+.cart-item-size-select {
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: var(--text-main);
+    border-radius: 4px;
+    padding: 2px 4px;
+    font-size: 0.75rem;
+    outline: none;
+}
+
+.cart-item-color-input {
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: var(--text-main);
+    border-radius: 4px;
+    padding: 2px 6px;
+    font-size: 0.75rem;
+    width: 80px;
+    outline: none;
+}
+
+.cart-item-qty-controls {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+}
+
+.cart-item-qty-btn {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: var(--text-main);
+    width: 22px;
+    height: 22px;
+    border-radius: 4px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8rem;
+    transition: var(--transition-smooth);
+}
+
+.cart-item-qty-btn:hover {
+    background: var(--primary);
+    border-color: var(--primary);
+}
+
+.cart-item-remove-btn {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    cursor: pointer;
+    font-size: 1.1rem;
+    transition: var(--transition-smooth);
+}
+
+.cart-item-remove-btn:hover {
+    color: var(--error);
+}
+
+/* Protocolos Recebidos (Admin) */
+.admin-protocols-list .admin-order-card {
+    border-color: rgba(229, 169, 60, 0.15);
+}
+
+.admin-protocols-list .admin-order-card:hover {
+    border-color: var(--accent-gold);
+    box-shadow: 0 0 20px rgba(229, 169, 60, 0.15);
+}
+
+/* Gerenciar Catálogo (Admin) */
+.admin-products-list .product-list-item {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    padding: 0.75rem;
+    border-radius: 12px;
+    transition: var(--transition-smooth);
+}
+
+.admin-products-list .product-list-item:hover {
+    border-color: rgba(255, 71, 126, 0.2);
+}
+
+.product-list-item-img {
+    width: 50px;
+    height: 50px;
+    border-radius: 6px;
+    background-size: cover;
+    background-position: center;
+    background-color: rgba(255,255,255,0.02);
+}
+
+.product-list-item-details {
+    flex: 1;
+    min-width: 0;
+}
+
+.product-list-item-name {
+    font-weight: 600;
+    font-size: 0.95rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    color: var(--text-main);
+}
+
+.product-list-item-prices {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    margin-top: 0.15rem;
+}
+
+.product-list-item-actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+/* Responsividade Mobile e E-commerce */
+@media (max-width: 550px) {
+    .cart-drawer {
+        width: 100vw;
+        padding: 1.5rem;
+    }
+}
+

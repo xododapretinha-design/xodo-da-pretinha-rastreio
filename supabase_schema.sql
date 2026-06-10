@@ -99,3 +99,21 @@ VALUES
     ]'::jsonb
 )
 ON CONFLICT (tracking_code) DO NOTHING;
+
+-- 4. Criar a tabela 'products' para o catálogo de estoque do marketplace
+CREATE TABLE IF NOT EXISTS products (
+    id SERIAL PRIMARY KEY,
+    name TEXT NOT NULL,
+    description TEXT,
+    price_brl NUMERIC(10, 2) NOT NULL,
+    price_aoa NUMERIC(10, 2) NOT NULL,
+    image_url TEXT,
+    original_store TEXT,
+    original_link TEXT,
+    status TEXT NOT NULL DEFAULT 'available',
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- Desabilitar RLS para a tabela de produtos
+ALTER TABLE products DISABLE ROW LEVEL SECURITY;
+
