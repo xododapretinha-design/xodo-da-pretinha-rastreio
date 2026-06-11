@@ -1,164 +1,182 @@
-# 🌸 Xodó da Pretinha - Sistema de Rastreio de Encomendas
+# 🌸 Xodó da Pretinha — Sistema de Marketplace & Rastreio
 
-Um sistema premium e moderno de rastreamento de encomendas de ponta a ponta (Full-Stack) projetado especificamente para a boutique online **Xodó da Pretinha**. O sistema permite que clientes acompanhem o progresso das suas compras de forma dinâmica e interativa, enquanto fornece aos administradores um painel completo para gerenciar status, editar informações e notificar clientes automaticamente por e-mail.
+<div align="center">
+  <img src="https://images.unsplash.com/photo-1490481651871-ab68de25d43d?auto=format&fit=crop&w=1200&q=80" alt="Boutique Banner" width="100%" style="border-radius: 16px; margin-bottom: 20px;" />
+
+  [![Vercel Deployment](https://img.shields.io/badge/Vercel-Deployed-success?style=for-the-badge&logo=vercel&logoColor=white&color=000000)](https://vercel.com/)
+  [![Database Supabase](https://img.shields.io/badge/Supabase-Cloud_Postgres-success?style=for-the-badge&logo=supabase&logoColor=white&color=3ECF8E)](https://supabase.com/)
+  [![Node.js](https://img.shields.io/badge/Node.js-v18+-blue?style=for-the-badge&logo=node.js&logoColor=white&color=339933)](https://nodejs.org/)
+  [![Express API](https://img.shields.io/badge/Express-Backend-lightgrey?style=for-the-badge&logo=express&logoColor=white&color=404d59)](https://expressjs.com/)
+  [![CSS3 Glassmorphism](https://img.shields.io/badge/CSS3-Boutique_UI-ff69b4?style=for-the-badge&logo=css3&logoColor=white&color=E31B5F)](https://styles.css)
+</div>
+
+---
+
+## 📖 Sobre o Projeto
+
+O **Xodó da Pretinha** é um ecossistema digital híbrido de **Marketplace, Redirecionamento e Compras Assistidas** que serve como ponte entre compradores em Angola e o comércio no Brasil. 
+
+A plataforma foi desenvolvida para oferecer uma experiência de compra sofisticada e fluida para os clientes, combinando um catálogo digital integrado com uma gaveta de sacola interativa. Do lado operacional, fornece ao administrador um painel completo para gerenciar o estoque local, monitorar os protocolos de compra recebidos e aprovar pedidos de rastreamento com fluxos de comunicação por e-mail e WhatsApp integrados.
+
+---
+
+## 🔄 Fluxo de Operação e Logística
+
+O ciclo de vida da compra é dividido em duas grandes etapas: **Geração de Protocolo** (pelo cliente) e **Aprovação & Rastreamento** (pelo administrador).
+
+```mermaid
+sequenceDiagram
+    actor Cliente
+    actor Admin
+    Note over Cliente: Navega pelo Catálogo de Roupas & Acessórios
+    Cliente->>Cliente: Adiciona produtos à Sacola (escolhe Tamanhos/Cores)
+    Cliente->>Admin: Finaliza o pedido e envia dados pelo WhatsApp da Loja
+    Note over Cliente: Visualiza o Recibo Boutique Digital com Protocolo (Fase 0)
+    Note over Admin: Recebe no WhatsApp e busca o Protocolo no Painel
+    Admin->>Admin: Efetua a compra nas lojas físicas/online no Brasil
+    Admin->>Admin: Clica em "Aprovação Rápida" ou "Aprovação Manual"
+    Note over Admin: Sistema gera o Código de Rastreio Oficial (ex: XODO-AO-8943)
+    Admin-->>Cliente: Envia e-mail de Confirmação e notificação rápida por WhatsApp
+    Note over Cliente: Acompanha a Timeline de Trânsito em tempo real
+```
 
 ---
 
 ## ✨ Recursos Principais
 
-### 👤 Área do Cliente
-- **Acesso Descomplicado:** Login prático digitando o código de rastreamento (ex: `XODO-PT-101`) ou através de links diretos de auto-login enviados por e-mail.
-- **Timeline Interativa:** Acompanhamento visual dos 4 estágios da encomenda com animações suaves e cores exclusivas para cada etapa:
-  1. 📦 **Aquisição** (Tons Dourados) - Compra e controle de qualidade na origem.
-  2. 🎀 **Empacotamento** (Tons Roxos) - Preparação física e embalagem perfumada.
-  3. ✈️ **Envio para Angola** (Tons Rosas) - Trânsito aéreo internacional via TAAG.
-  4. 🏠 **Disponível para Retirada** (Tons Esmeralda) - Pronto para ser retirado no ponto de distribuição em Talatona, Luanda.
-- **Comprovante de Envio Premium:** Visualização detalhada da encomenda com suporte a impressão física formatada (`@media print`) contendo QR Code simulado e layout limpo.
+### 🛍️ Área Pública do Cliente (E-commerce)
+- **Boutique Catalog Grid:** Visualização premium de peças de vestuário com fotos em alta definição, preços sugeridos em Kwanzas (AOA) e moeda de origem (BRL).
+- **Sacola Deslizante (Cart Drawer):** 
+  - Gaveta responsiva com efeito de desfoque de vidro (*Glassmorphism*).
+  - Seleção dinâmica de tamanhos (**PP, P, M, G, GG, XG**) e cores customizadas por item.
+  - Ajuste rápido de quantidades e cálculo de subtotal automático em tempo real.
+- **Recibo Digital Premium:** 
+  - Visualização de sucesso estruturada como um cupom fiscal de boutique com borda tracejada.
+  - Exibe detalhadamente cada item solicitado com seu tamanho, cor e respectivo subtotal.
+  - Botão integrado **"Confirmar no WhatsApp"** que formata os dados do carrinho e os envia ao suporte com um visual estruturado e profissional.
+- **Portal de Rastreio:** Timeline interativa de 5 fases com animações dinâmicas e paleta de cores harmoniosa para o acompanhamento dos pacotes.
 
-### 👑 Painel do Administrador
-- **Autenticação Segura:** Login protegido com token HMAC assinado.
-- **Bento Dashboard:** Métricas em tempo real (Total de encomendas, Em Trânsito, Entregues, Receita Estimada).
-- **Gerenciamento de Encomendas:** Criar novas encomendas com múltiplos itens, editar dados de clientes (nome, e-mail, destino), e registrar notas detalhadas no histórico de trânsito.
-- **Transição de Estágios Simplificada:** Atualize o estágio com um único clique. O sistema se encarrega de registrar no histórico e enviar o e-mail correspondente.
-
-### 📧 Automação de E-mails (Resend ou Gmail SMTP)
-- **Suporte Duplo:** Integração nativa com a API do **Resend** (ideal com domínio próprio) ou via **Gmail SMTP** (100% gratuito e sem necessidade de domínio).
-- **Templates Customizados:** 4 modelos de e-mail HTML modernos e responsivos (um para cada fase), contendo placeholders para personalização de nome, código de rastreio, produtos e mensagens de histórico.
-- **Fallback Automático:** Caso ocorra algum erro na leitura dos templates físicos, o sistema dispara um e-mail HTML padrão robusto sem interromper o fluxo da aplicação.
-
----
-
-## 🛠️ Stack Tecnológica
-
-- **Frontend:** HTML5 Semântico, Javascript Moderno (ES6+) como Single Page Application (SPA), CSS3 com variáveis dinâmicas (HSL) e visual Glassmorphism.
-- **Backend:** Node.js, Express, Cors, dotenv.
-- **Banco de Dados:** **Supabase (PostgreSQL)** com suporte a JSONB para histórico e produtos. Possui fallback automático para arquivo JSON local (`data/orders.json`) em ambiente de desenvolvimento.
-- **Disparo de E-mails:** **Resend SDK**.
-- **Hospedagem Recomendada:** **Vercel** (Serverless Functions para o backend + CDN estático para o frontend).
+### 👑 Painel Administrativo de Controle
+- **Dash Bento-Grid:** Estatísticas instantâneas de encomendas cadastradas, itens em trânsito, entregas concluídas e estimativas financeiras.
+- **Gestão do Catálogo de Peças (CRUD):** Interface intuitiva para adicionar, buscar, editar status de disponibilidade ("Disponível" / "Sem Estoque") e excluir produtos da vitrine.
+- **Aba de Protocolos Pendentes (Fase 0):** Listagem e inspeção detalhada de pedidos de cotação enviados por clientes.
+- **Aprovação com 1 Clique (Fast-Approval):** 
+  - O administrador clica em *"Aprovação Rápida"* para aprovar e gerar um código de rastreio instantaneamente.
+  - Abre uma janela pós-aprovação de sucesso contendo o novo código, botão de cópia rápida e botão **"Notificar Cliente"** que encaminha o código e o link da encomenda diretamente no WhatsApp do comprador.
 
 ---
 
-## 📁 Estrutura de Pastas
+## 🛠️ Stack Tecnológica e Arquitetura
+
+- **Interface:** HTML5 Semântico, CSS3 (variáveis dinâmicas HSL e responsividade touch-first), Vanilla ES6+ Javascript (SPA Router).
+- **Backend:** Node.js com Express para serviços serverless rápidos.
+- **Banco de Dados:** **Supabase Cloud (PostgreSQL)** com tabelas relacionais de pedidos, histórico e catálogo.
+  - *Fallback inteligente:* Se as credenciais do Supabase estiverem offline ou em desenvolvimento local, o backend altera as rotas de gravação de forma transparente para arquivos locais `JSON`.
+- **Comunicação:** **Resend** (API transacional) ou **Gmail SMTP** (para envio de notificações sem domínio próprio de forma gratuita).
+
+---
+
+## 📁 Estrutura do Repositório
 
 ```text
 Ratreio/
 ├── api/
-│   └── index.js             # API Express e Integração Supabase/Resend (Serverless Function)
+│   └── index.js             # Servidor Express & Endpoints da API (Serverless Function)
 ├── data/
-│   └── orders.json          # Banco de dados JSON local (fallback / dev local)
+│   ├── orders.json          # Arquivo de dados de backup local (pedidos/protocolos)
+│   └── products.json        # Arquivo de dados de backup local (catálogo)
 ├── templates/
-│   ├── 1_acquisition.html   # Template de e-mail para Fase 1 (Aquisição)
-│   ├── 2_packaging.html     # Template de e-mail para Fase 2 (Empacotamento)
-│   ├── 3_shipping.html      # Template de e-mail para Fase 3 (Envio)
-│   └── 4_reception.html     # Template de e-mail para Fase 4 (Recepção)
-├── app.js                   # Lógica e rotas da SPA no Frontend
-├── index.html               # Estrutura HTML da SPA
-├── styles.css               # Design Visual e responsividade (Glassmorphism e Print)
-├── supabase_schema.sql      # Script de criação de tabelas e seeds para o Supabase
-├── vercel.json              # Configuração de rotas serverless para Vercel
-├── package.json             # Dependências do projeto
-├── .gitignore               # Arquivos a ignorar no git
-├── .env.example             # Modelo das variáveis de ambiente necessárias
-└── .env                     # Variáveis locais (Não comitar!)
+│   ├── 0_protocol.html      # Template de e-mail de Novo Pedido (Fase 0)
+│   ├── 1_acquisition.html   # Template de e-mail de Compra Efetuada (Fase 1)
+│   ├── 2_packaging.html     # Template de e-mail de Embalagem & Selação (Fase 2)
+│   ├── 3_shipping.html      # Template de e-mail de Despacho Aéreo (Fase 3)
+│   └── 4_reception.html     # Template de e-mail de Entrega Concluída (Fase 4)
+├── app.js                   # Lógica da Single Page Application (SPA) e Eventos DOM
+├── index.html               # Estrutura HTML do ecossistema e modais
+├── styles.css               # Design Visual, animações, tema Glassmorphism e Print Styles
+├── supabase_schema.sql      # Estrutura de Tabelas e sementes iniciais para o Banco Postgres
+├── vercel.json              # Mapeamento e roteamento de APIs para o Vercel Serverless
+└── package.json             # Dependências e scripts de desenvolvimento
 ```
 
 ---
 
-## 🚀 Como Executar Localmente
+## 🚀 Instalação e Execução Local
 
-### 1. Pré-requisitos
-- Ter o [Node.js](https://nodejs.org) instalado.
-- Ter o Git instalado para versionamento.
-
-### 2. Clonar e Instalar Dependências
+### 1. Clonar o Repositório e Instalar Dependências
 ```bash
-# Clone este repositório
-git clone <url-do-seu-repositorio>
+git clone https://github.com/xododapretinha-design/xodo-da-pretinha-rastreio.git
 cd Ratreio
-
-# Instale as dependências
 npm install
 ```
 
-### 3. Configurar Variáveis de Ambiente
-Copie o arquivo de exemplo e preencha com suas credenciais:
+### 2. Configurar Variáveis de Ambiente
+Duplique o arquivo `.env.example` para `.env` na raiz do projeto:
 ```bash
 cp .env.example .env
 ```
-Abra o arquivo `.env` e configure:
-- `RESEND_API_KEY`: Sua chave de API do Resend (se usar o Resend).
-- `GMAIL_USER` e `GMAIL_APP_PASS`: Seu e-mail e Senha de App do Gmail (se preferir a alternativa gratuita sem domínio).
-- `ADMIN_PASSWORD`: A senha que você usará para acessar o painel admin.
-- `JWT_SECRET`: Uma frase secreta para garantir a segurança da sessão do admin.
-- `SUPABASE_URL` e `SUPABASE_ANON_KEY` (Opcional localmente, obrigatório na nuvem): URL e chave anônima do seu projeto Supabase. Se deixados como padrão, o sistema usará o banco de dados JSON local `data/orders.json`.
+Abra o arquivo `.env` e configure as credenciais locais:
+- `ADMIN_PASSWORD`: Senha administrativa de acesso ao painel.
+- `JWT_SECRET`: Chave privada para encriptação da sessão JWT do admin.
+- `SUPABASE_URL` / `SUPABASE_ANON_KEY`: URL e chave anônima do projeto Supabase. 
+  *(Opcional localmente: se mantiver os valores de exemplo, o servidor usará dados locais da pasta `/data`)*
 
-### 4. Rodar o Servidor
+### 3. Executar o Servidor Local
 ```bash
 npm run dev
-# ou
-node api/index.js
 ```
-Acesse no seu navegador: `http://localhost:8080`
+Acesse o sistema localmente em: `http://localhost:8080`
 
 ---
 
-## ☁️ Implantação em Produção (Vercel & Supabase)
+## ☁️ Implantação e Deploy em Produção
 
-### Passo 1: Configurar Banco de Dados no Supabase
-1. Crie uma conta ou acesse o [Supabase](https://supabase.com/).
-2. Crie um novo projeto.
-3. No painel do projeto, vá em **SQL Editor** e clique em **New Query**.
-4. Copie o conteúdo do arquivo [supabase_schema.sql](file:///Users/fr.utxicascj/Desktop/Ratreio/supabase_schema.sql) deste repositório, cole no editor e clique em **Run**. Isso criará a tabela e inserirá dados de teste.
-5. Vá em **Project Settings -> API** e copie o **Project URL** e a chave **anon public**.
+### 1. Configurar Banco de Dados no Supabase
+1. Crie um novo projeto no [Supabase](https://supabase.com/).
+2. Abra o menu **SQL Editor** no painel lateral e clique em **New Query**.
+3. Copie o script SQL do arquivo [supabase_schema.sql](file:///Users/fr.utxicascj/Desktop/Ratreio/supabase_schema.sql) deste repositório, cole no editor e clique em **Run**. Isto criará a estrutura física de tabelas e carregará dados sementes.
 
-### Passo 2: Configurar Envio de E-mails (Escolha uma opção)
+### 2. Configuração de Notificações por E-mail (Escolha uma opção)
 
-#### Opção A (Recomendada - Gratuita e Sem Domínio): Usar Gmail SMTP
-Se você não tem um domínio próprio (ex: `.com` ou `.shop`), você pode enviar e-mails de notificação usando sua conta pessoal do Gmail de forma totalmente gratuita e sem restrição de destinatários:
-1. Acesse as configurações da sua **Conta Google** (no perfil do seu Gmail).
-2. Vá em **Segurança** e ative a **Verificação em duas etapas** (se já não estiver ativa).
-3. Na barra de busca da Conta Google, pesquise por **Senhas de app** (App Passwords).
-4. Crie uma nova senha de aplicativo (escolha um nome como "Rastreio Boutique").
-5. O Google gerará uma senha de **16 caracteres**. Copie-a (sem os espaços).
-6. Adicione no seu `.env` local e nas chaves da Vercel:
+#### Opção A (Recomendada para Dev/Testes): Usar Gmail SMTP
+Ideal se você não tem um domínio próprio verificado. Permite o envio de e-mails usando sua conta Gmail de forma gratuita:
+1. Acesse as configurações da sua **Conta Google**.
+2. Vá em **Segurança** e ative a **Verificação em duas etapas**.
+3. No campo de busca de sua Conta Google, pesquise por **Senhas de app**.
+4. Crie uma nova senha escolhendo um nome personalizado (ex: "Xodó Notificações").
+5. O Google fornecerá uma chave de **16 caracteres**. Copie-a.
+6. Configure as variáveis na Vercel:
    - `GMAIL_USER` = `seu-email@gmail.com`
-   - `GMAIL_APP_PASS` = `sua-senha-de-app-de-16-caracteres`
+   - `GMAIL_APP_PASS` = `chave-de-16-caracteres`
 
-#### Opção B: Configurar o Domínio no Resend
-Se você já possui um domínio registrado e quer e-mails mais profissionais (ex: `contato@xododapretinha.shop`):
+#### Opção B (Recomendada para Produção): Usar Resend API
+Recomendada se você possui um domínio próprio verificado (ex: `boutique@xododapretinha.shop`):
 1. Cadastre-se no [Resend](https://resend.com/).
-2. Vá em **Domains** e adicione o domínio do seu site (ex: `xododapretinha.shop`).
-3. Adicione os registros DNS apontados pelo Resend no seu provedor de domínio (como GoDaddy, Hostgator, Cloudflare).
-4. Após a verificação do domínio, preencha no `.env` e Vercel:
+2. Em **Domains**, adicione o domínio do seu site e configure as chaves DNS fornecidas no seu registrador de domínio.
+3. Obtenha a API Key em **API Keys**.
+4. Configure as variáveis na Vercel:
    - `RESEND_API_KEY` = `re_sua_chave`
-   - `EMAIL_FROM` = `Xodó da Pretinha <contato@seu-dominio-verificado.com>`
+   - `EMAIL_FROM` = `Xodó da Pretinha <sua-conta-verificada@seu-dominio.com>`
 
-### Passo 3: Publicação na Vercel
-1. Crie ou conecte sua conta na [Vercel](https://vercel.com/).
-2. Adicione um novo projeto e conecte com o repositório do GitHub criado.
-3. Durante a etapa de configuração, clique em **Environment Variables** e adicione as variáveis dependendo do método de envio escolhido:
-   * **Gerais e Banco:**
-     - `PORT` = `8080`
-     - `ADMIN_USER` = `admin`
-     - `ADMIN_PASSWORD` = (sua senha segura)
-     - `JWT_SECRET` = (seu segredo longo)
-     - `SUPABASE_URL` = (sua url do supabase)
-     - `SUPABASE_ANON_KEY` = (sua chave anon do supabase)
-   * **Se optar pelo Gmail SMTP (Opção A):**
-     - `GMAIL_USER` = `seu-email@gmail.com`
-     - `GMAIL_APP_PASS` = (sua senha de app de 16 caracteres)
-   * **Se optar pelo Resend (Opção B):**
-     - `RESEND_API_KEY` = (sua chave real do resend)
-     - `EMAIL_FROM` = `Xodó da Pretinha <contato@seu-dominio-verificado.com>`
-4. Clique em **Deploy**. A Vercel cuidará do build e fornecerá um link HTTPS seguro para acessar o sistema de qualquer lugar.
+### 3. Deploy na Vercel
+1. Conecte sua conta do GitHub na [Vercel](https://vercel.com/).
+2. Importe o repositório do projeto.
+3. Nas **Environment Variables** (Variáveis de Ambiente), configure:
+   - `ADMIN_USER` = `admin`
+   - `ADMIN_PASSWORD` = `sua-senha-admin`
+   - `JWT_SECRET` = `seu-segredo-de-sessao`
+   - `SUPABASE_URL` = `https://seu-projeto-supabase.supabase.co`
+   - `SUPABASE_ANON_KEY` = `sua-chave-anon-supabase`
+   - E as chaves de e-mail correspondentes à **Opção A** ou **Opção B** detalhadas acima.
+4. Clique em **Deploy**. A Vercel construirá a aplicação serverless e fornecerá um endereço HTTPS seguro.
 
 ---
 
-## 🔒 Segurança e Melhores Práticas
-- **Sem Estado (Stateless):** O backend Express foi configurado para rodar em funções serverless da Vercel. Toda a leitura e gravação em produção é feita de forma assíncrona no Supabase, garantindo que nenhum dado seja perdido quando a função serverless for desalocada ou reiniciada.
-- **Exclusão de Arquivos Sensíveis:** O arquivo `.env` está explicitamente no `.gitignore` para prevenir vazamentos acidentais de tokens.
+## 🔒 Segurança e Práticas
+- **Zero Vazamentos:** O arquivo `.env` está configurado explicitamente no `.gitignore` para impedir o commit de chaves secretas.
+- **Serverless-First:** Toda lógica de backend Express foi preparada para funcionar sob demanda no Vercel Functions, eliminando a manutenção de servidores ativos 24/7.
 
 ---
 
 ## 🖤 Licença
-Este projeto foi desenvolvido com carinho para uso exclusivo da boutique **Xodó da Pretinha**. Todos os direitos reservados.
+Este sistema foi projetado e construído com carinho para o ecossistema comercial da boutique **Xodó da Pretinha**. Todos os direitos reservados.

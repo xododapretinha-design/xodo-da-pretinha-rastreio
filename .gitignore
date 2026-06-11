@@ -22,3 +22,7 @@ Thumbs.db
 *.njsproj
 *.sln
 *.sw?
+
+# Scripts Pessoais
+download_yt.py
+
