@@ -1,0 +1,74 @@
+[
+  {
+    "id": 1,
+    "name": "Morte Súbita - Máscara de Hidratação 450g",
+    "description": "Máscara de tratamento semanal para cabelos sedentos por vida. Excelente para o cronograma capilar de nutrição e hidratação profunda. Devolve a suavidade e o brilho intenso.",
+    "price_brl": 45.90,
+    "price_aoa": 15000.00,
+    "image_url": "https://images.unsplash.com/photo-1608248597481-496100c80836?auto=format&fit=crop&w=500&q=80",
+    "original_store": "Lola Cosmetics",
+    "original_link": "",
+    "status": "available",
+    "created_at": "2026-06-11T12:00:00.000Z"
+  },
+  {
+    "id": 2,
+    "name": "Creme de Pentear Tô de Cacho Profissional 1L",
+    "description": "Creme definidor de cachos de alta performance com óleo de coco e babosa. Garante definição prolongada por até 72 horas, controle do frizz e hidratação extrema.",
+    "price_brl": 29.90,
+    "price_aoa": 10000.00,
+    "image_url": "https://images.unsplash.com/photo-1526947425960-945c6e72858f?auto=format&fit=crop&w=500&q=80",
+    "original_store": "Salon Line",
+    "original_link": "",
+    "status": "available",
+    "created_at": "2026-06-11T12:01:00.000Z"
+  },
+  {
+    "id": 3,
+    "name": "Ekos Castanha - Creme Hidratante para Mãos 75g",
+    "description": "Polpa hidratante enriquecida com óleo bruto de castanha. Nutre intensamente as mãos e cutículas, estimulando a barreira de proteção natural da pele. Toque aveludado e fragrância acolhedora.",
+    "price_brl": 38.90,
+    "price_aoa": 12000.00,
+    "image_url": "https://images.unsplash.com/photo-1617897903246-719242758050?auto=format&fit=crop&w=500&q=80",
+    "original_store": "Natura",
+    "original_link": "",
+    "status": "available",
+    "created_at": "2026-06-11T12:02:00.000Z"
+  },
+  {
+    "id": 4,
+    "name": "Malbec Desodorante Colônia Perfume Masculino 100ml",
+    "description": "Perfume masculino marcante feito com álcool vínico macerado em barris de carvalho francês. Notas amadeiradas sofisticadas que traduzem poder, mistério e elegância.",
+    "price_brl": 199.90,
+    "price_aoa": 55000.00,
+    "image_url": "https://images.unsplash.com/photo-1541643600914-78b084683601?auto=format&fit=crop&w=500&q=80",
+    "original_store": "O Boticário",
+    "original_link": "",
+    "status": "available",
+    "created_at": "2026-06-11T12:03:00.000Z"
+  },
+  {
+    "id": 5,
+    "name": "Creme de Pentear Juba Modelador de Cachos 500ml",
+    "description": "Creme modelador de textura fluida ideal para cabelos crespos e cacheados. Enriquecido com manteiga de murumuru e óleo de linhaça dourada. Proporciona volume e maciez sem pesar.",
+    "price_brl": 49.90,
+    "price_aoa": 16000.00,
+    "image_url": "https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?auto=format&fit=crop&w=500&q=80",
+    "original_store": "Widi Care",
+    "original_link": "",
+    "status": "available",
+    "created_at": "2026-06-11T12:04:00.000Z"
+  },
+  {
+    "id": 6,
+    "name": "Base Líquida Boca Rosa Beauty Mate 30ml",
+    "description": "Base de alta cobertura e longa duração com acabamento mate super confortável. Resistente à água, não transfere e disfarça imperfeições com textura ultra-leve e uniforme.",
+    "price_brl": 59.90,
+    "price_aoa": 18000.00,
+    "image_url": "https://images.unsplash.com/photo-1620916566398-39f1143ab7be?auto=format&fit=crop&w=500&q=80",
+    "original_store": "Boca Rosa",
+    "original_link": "",
+    "status": "available",
+    "created_at": "2026-06-11T12:05:00.000Z"
+  }
+]
